@@ -1,0 +1,121 @@
+{
+  "" : {
+    "const-values" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ElectroLite-primary.swiftconstvalues",
+    "dependencies" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ElectroLite-primary.d",
+    "diagnostics" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ElectroLite-primary.dia",
+    "emit-module-dependencies" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ElectroLite-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ElectroLite-primary-emit-module.dia",
+    "pch" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ElectroLite-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ElectroLite-primary.swiftdeps"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Components/ActivityListItem.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityListItem.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityListItem.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityListItem.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Components/AvatarView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/AvatarView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/AvatarView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/AvatarView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Components/CryptoListItem.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CryptoListItem.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CryptoListItem.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CryptoListItem.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Components/ObjectGridItem.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectGridItem.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectGridItem.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectGridItem.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/ContentView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ContentView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Data/Data.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Data.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Data.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Data.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Data/Helpers.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Helpers.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Helpers.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Helpers.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Persistence.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Persistence.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Persistence.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/Persistence.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/ActivityView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Detail/ActivityDetailView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityDetailView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityDetailView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ActivityDetailView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Detail/CryptoDetailView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CryptoDetailView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CryptoDetailView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CryptoDetailView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Detail/ObjectDetailView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectDetailView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectDetailView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectDetailView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Settings/AddWalletView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/AddWalletView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/AddWalletView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/AddWalletView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Settings/SettingsView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/SettingsView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Settings/WalletsView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletsView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletsView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletsView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Tabs/CoinsView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CoinsView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CoinsView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/CoinsView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/Views/Tabs/ObjectsView.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectsView.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectsView.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/ObjectsView.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/ElectroLite/electroliteApp.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/electroliteApp.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/electroliteApp.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/electroliteApp.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/DerivedSources/CoreDataGenerated/lil_wallet/WalletAddress+CoreDataClass.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletAddress+CoreDataClass.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletAddress+CoreDataClass.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletAddress+CoreDataClass.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/DerivedSources/CoreDataGenerated/lil_wallet/WalletAddress+CoreDataProperties.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletAddress+CoreDataProperties.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletAddress+CoreDataProperties.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/WalletAddress+CoreDataProperties.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/DerivedSources/CoreDataGenerated/lil_wallet/lil_wallet+CoreDataModel.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/lil_wallet+CoreDataModel.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/lil_wallet+CoreDataModel.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/lil_wallet+CoreDataModel.o"
+  },
+  "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/imdanielaustin/Github/ElectroLite/build/ElectroLite.build/Release-iphoneos/ElectroLite.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  }
+}

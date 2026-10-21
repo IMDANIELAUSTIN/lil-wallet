@@ -729,7 +729,7 @@ let manager = SocketManager(
     ]
 )
 
-let socket = manager.defaultSocket
+nonisolated(unsafe) let socket = manager.defaultSocket
 let addressSocket = manager.socket(forNamespace: "/address")
 
 class Network: ObservableObject {

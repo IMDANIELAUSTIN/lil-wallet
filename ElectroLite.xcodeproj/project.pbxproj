@@ -43,7 +43,7 @@
 		8621330D2753E3EA002BD765 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8621330F2753E3EA002BD765 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		862133122753E3EA002BD765 /* lil_wallet.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = lil_wallet.xcdatamodel; sourceTree = "<group>"; };
-		862133212753E474002BD765 /* CryptoListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CryptoListItem.swift; path = "lil wallet/Components/CryptoListItem.swift"; sourceTree = SOURCE_ROOT; };
+		862133212753E474002BD765 /* CryptoListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoListItem.swift; sourceTree = "<group>"; };
 		862133232753E47E002BD765 /* ActivityListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityListItem.swift; sourceTree = "<group>"; };
 		862133252753E485002BD765 /* ObjectGridItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectGridItem.swift; sourceTree = "<group>"; };
 		862133272753E48F002BD765 /* CoinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinsView.swift; sourceTree = "<group>"; };
@@ -398,7 +398,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"lil wallet/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"ElectroLite/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "ElectroLite—Wallet for Crypto and Energy";
@@ -431,7 +431,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"lil wallet/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"ElectroLite/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "ElectroLite—Wallet for Crypto and Energy";
