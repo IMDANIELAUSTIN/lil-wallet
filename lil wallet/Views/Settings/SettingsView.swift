@@ -11,6 +11,7 @@ import CoreData
 struct SettingsView: View {
     @Binding var showSettingsView: Bool
     @AppStorage("currentWalletAddress") private var currentWalletAddress: String = ""
+    @AppStorage("openSeaAPIKey") private var openSeaAPIKey: String = ""
     @Environment(\.managedObjectContext) private var viewContext
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
@@ -21,7 +22,7 @@ struct SettingsView: View {
     var body: some View {
         let appFont = appearance.getAppFont()
         
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(content: {
                     NavigationLink {
@@ -36,7 +37,7 @@ struct SettingsView: View {
                             if currentWalletAddress != "" {
                                 Text(wallet.formatAddress(address: currentWalletAddress))
                                     .font(.system(.body, design: .monospaced))
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -47,7 +48,7 @@ struct SettingsView: View {
                         ForEach(Array(AppColor.allCases), id: \.self) {
                             Text($0.rawValue.capitalized)
                                 .font(.system(.body, design: appFont))
-                                .foregroundColor($0 == .monochrome ? nil : $0.color)
+                                .foregroundStyle($0 == .monochrome ? Color.primary : $0.color)
                         }
                     }
                     
@@ -58,6 +59,17 @@ struct SettingsView: View {
                         }
                     }
                 }
+                
+                Section(content: {
+                    SecureField("Optional OpenSea v2 API Key", text: $openSeaAPIKey)
+                        .font(.system(.body, design: appFont))
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+                }, header: {
+                    Text("NFT API")
+                }, footer: {
+                    Text("Uses demo objects automatically when no API key is configured.")
+                })
                 
                 Section {
                     NavigationLink {
@@ -82,7 +94,7 @@ struct SettingsView: View {
                         Spacer()
                         Image(systemName: "square.on.circle")
                             .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(Color(UIColor.tertiaryLabel))
+                            .foregroundStyle(Color(UIColor.tertiaryLabel))
                         Spacer()
                     }
                     .padding(.vertical, 24)
@@ -101,7 +113,7 @@ struct SettingsView: View {
                 }
             }
         }
-        .accentColor(appearance.getAppColor())
+        .tint(appearance.getAppColor())
     }
 }
 

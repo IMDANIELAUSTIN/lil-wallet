@@ -16,27 +16,26 @@ struct ObjectGridItem: View {
             if object.isSVG() {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .foregroundColor(appearance.getAppColor())
+                        .foregroundStyle(appearance.getAppColor())
                         .aspectRatio(1, contentMode: .fill)
                     
                     Text(object.name ?? "Untitled")
                         .font(.system(.caption, design: appearance.getAppFont()))
                         .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.systemBackground))
+                        .foregroundStyle(Color(UIColor.systemBackground))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                         .lineLimit(3)
                 }
             } else {
                 ImageView(imageUrl: object.image_url)
-                    .mask(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .foregroundColor(Color(UIColor.secondarySystemBackground))
+                            .foregroundStyle(Color(UIColor.secondarySystemBackground))
                             .aspectRatio(1, contentMode: .fill)
                     )
             }
-            
         })
     }
 }

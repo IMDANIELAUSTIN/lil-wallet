@@ -9,7 +9,6 @@ import SwiftUI
 import WebKit
 
 struct ObjectDetailView: View {
-    @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var object: OpenSeaAsset
     @EnvironmentObject var appearance: Appearance
@@ -28,7 +27,7 @@ struct ObjectDetailView: View {
                             .aspectRatio(contentMode: .fit)
                     } placeholder: {
                         Rectangle()
-                            .foregroundColor(Color(UIColor.secondarySystemBackground))
+                            .foregroundStyle(Color(UIColor.secondarySystemBackground))
                             .aspectRatio(1, contentMode: .fit)
                     }
                 }
@@ -53,7 +52,7 @@ struct ObjectDetailView: View {
             
             if object.traits.count > 0 {
                 Section(content: {
-                    ForEach(object.traits, id: \.trait_type) { trait in
+                    ForEach(object.traits) { trait in
                         HStack {
                             Text(trait.trait_type.capitalized)
                                 .font(.system(.body, design: appFont))
@@ -70,22 +69,24 @@ struct ObjectDetailView: View {
                 })
             }
             
-            Section(content: {
-                Group {
-                    Link(destination: URL(string: object.permalink)!, label: {
-                        Text("View on OpenSea")
-                            .font(.system(.body, design: appFont))
-                    })
-                }
-                .font(.system(.body, design: appFont))
-                .foregroundColor(appearance.getAppColor())
-                .listRowSeparator(.hidden)
-            }, header: {
-                Text("Options")
-            })
+            if let permalinkURL = URL(string: object.permalink) {
+                Section(content: {
+                    Group {
+                        Link(destination: permalinkURL, label: {
+                            Text("View on OpenSea")
+                                .font(.system(.body, design: appFont))
+                        })
+                    }
+                    .font(.system(.body, design: appFont))
+                    .foregroundStyle(appearance.getAppColor())
+                    .listRowSeparator(.hidden)
+                }, header: {
+                    Text("Options")
+                })
+            }
         }
-        .listStyle(InsetListStyle())
-        .navigationBarTitle(object.name ?? "Untitled")
+        .listStyle(.inset)
+        .navigationTitle(object.name ?? "Untitled")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -97,21 +98,39 @@ struct WebView: UIViewRepresentable {
         let webView = WKWebView()
         webView.scrollView.isScrollEnabled = false
         webView.isUserInteractionEnabled = false
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
         return webView
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        if let url = URL(string: loadURL) {
-            do {
-                let contents = try String(contentsOf: url)
-                let html = contents + "<style>html, body { width: 100%; height: 100%; margin: 0; padding: 0 }</style><meta name=\"viewport\" content=\"width=device-width, shrink-to-fit=YES\">"
-                uiView.loadHTMLString(html, baseURL: nil)
-            } catch {
-                // contents could not be loaded
-            }
-        } else {
-            // the URL was bad
+        if loadURL.hasPrefix("data:image/svg+xml") {
+            let html = """
+            <html>
+            <head>
+            <meta name="viewport" content="width=device-width, shrink-to-fit=YES">
+            <style>html, body { width: 100%; height: 100%; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; } img { width: 100%; height: 100%; object-fit: contain; }</style>
+            </head>
+            <body><img src="\(loadURL)" /></body>
+            </html>
+            """
+            uiView.loadHTMLString(html, baseURL: nil)
+            return
         }
+        
+        guard let url = URL(string: loadURL) else { return }
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            guard let data = data, let contents = String(data: data, encoding: .utf8) else {
+                DispatchQueue.main.async {
+                    uiView.load(URLRequest(url: url))
+                }
+                return
+            }
+            let html = contents + "<style>html, body { width: 100%; height: 100%; margin: 0; padding: 0 }</style><meta name=\"viewport\" content=\"width=device-width, shrink-to-fit=YES\">"
+            DispatchQueue.main.async {
+                uiView.loadHTMLString(html, baseURL: url)
+            }
+        }.resume()
     }
 }
 

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import CoreData
+import Combine
 
 struct ContentView: View {
     @State var activeTab = 0
@@ -23,7 +25,7 @@ struct ContentView: View {
                     Spacer()
                     Text(Image(systemName: "square.on.circle"))
                         .font(.system(size: 56, weight: .medium))
-                        .foregroundColor(appearance.getAppColor())
+                        .foregroundStyle(appearance.getAppColor())
                     Spacer()
                 }
             } else {
@@ -47,11 +49,11 @@ struct ContentView: View {
                         }
                         .tag(1)
                 }
-                .accentColor(appearance.getAppColor())
+                .tint(appearance.getAppColor())
             }
         }
         .animation(.easeInOut(duration: 0.16), value: showLaunchScreen())
-        .onReceive(timer) { time in
+        .onReceive(timer) { _ in
             if self.timeRemaining > 0 {
                 self.timeRemaining -= 1
             }

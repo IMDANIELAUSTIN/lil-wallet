@@ -29,12 +29,12 @@ struct CryptoListItem: View {
                         
                         Text(token.percentChange())
                             .font(.system(.callout, design: appFont))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     
                     Text("\(wallet.formatCurrency(value: token.value()))")
                         .font(.system(.body, design: appFont))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             .padding(.vertical, 10)

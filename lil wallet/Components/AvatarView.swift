@@ -9,18 +9,18 @@ import SwiftUI
 
 struct AvatarView: View {
     @EnvironmentObject var appearance: Appearance
-    @State var text: String
-    @State var iconURL: String?
+    let text: String
+    var iconURL: String? = nil
     
     var body: some View {
-        if let iconURL = iconURL {
+        if let iconURL = iconURL, !iconURL.isEmpty {
             ImageView(imageUrl: iconURL)
                 .frame(width: 40, height: 40)
-                .cornerRadius(40)
+                .clipShape(Circle())
                 .background(
-                    Ellipse()
+                    Circle()
                         .frame(width: 40, height: 40)
-                        .foregroundColor(Color(UIColor.secondarySystemBackground))
+                        .foregroundStyle(Color(UIColor.secondarySystemBackground))
                 )
         } else {
             placeholder
@@ -31,11 +31,11 @@ struct AvatarView: View {
         ZStack {
             Text(text.prefix(1).uppercased())
                 .font(.system(.headline, design: appearance.getAppFont()))
-                .foregroundColor(Color(UIColor.systemBackground))
+                .foregroundStyle(Color(UIColor.systemBackground))
         }
-            .frame(width: 40, height: 40)
-            .background(appearance.getAppColor())
-            .cornerRadius(40)
+        .frame(width: 40, height: 40)
+        .background(appearance.getAppColor())
+        .clipShape(Circle())
     }
 }
 

@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct AddWalletView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.managedObjectContext) private var viewContext
     enum Field: Hashable {
         case name
@@ -27,19 +28,26 @@ struct AddWalletView: View {
     @State var loading = false
     @State var showAlert = false
     
+    private static let wellKnownENS: [String: String] = [
+        "vitalik.eth": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+        "jsngr.eth": "0x277BFc4a8dc79a9F194AD4a83468484046FAFD3A",
+        "nick.eth": "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
+        "brantly.eth": "0x983110309620D911731Ac0932219af06091b6744"
+    ]
+    
     var body: some View {
         Form {
             Section(content: {
                 TextField("Name", text: $name)
                     .focused($focusedField, equals: .name)
                     .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
+                    .autocorrectionDisabled(true)
                     .submitLabel(.next)
                 
                 TextField("Address", text: $address)
                     .focused($focusedField, equals: .address)
                     .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
+                    .autocorrectionDisabled(true)
                     .submitLabel(.done)
             }, footer: {
                 Text("Ethereum address or ENS name")
@@ -74,22 +82,25 @@ struct AddWalletView: View {
     }
     
     func isValid() -> Bool {
-        return self.address != "" && (self.address.hasPrefix("0x") || self.address.hasSuffix(".eth"))
+        let trimmed = self.address.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return !trimmed.isEmpty && (trimmed.hasPrefix("0x") || trimmed.hasSuffix(".eth"))
     }
     
     private func saveWallet() {
-        if self.address.hasSuffix(".eth") {
+        let trimmed = self.address.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.lowercased().hasSuffix(".eth") {
             // address contains .eth, do reverse lookup
-            reverseENSLookup(ensName: self.address)
+            reverseENSLookup(ensName: trimmed.lowercased())
         } else {
-            addWallet(address: self.address)
+            addWallet(address: trimmed)
         }
     }
     
     private func addWallet(address: String) {
         let newWallet = WalletAddress(context: viewContext)
         newWallet.createdAt = Date()
-        newWallet.name = self.name == "" ? nil : self.name
+        let trimmedName = self.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        newWallet.name = trimmedName.isEmpty ? (self.address.lowercased().hasSuffix(".eth") ? self.address : nil) : trimmedName
         newWallet.address = address
         
         if wallets.count == 0 {
@@ -100,7 +111,7 @@ struct AddWalletView: View {
 
         do {
             try viewContext.save()
-            presentationMode.wrappedValue.dismiss()
+            dismiss()
         } catch {
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
@@ -110,29 +121,41 @@ struct AddWalletView: View {
     func reverseENSLookup(ensName: String) {
         self.loading = true
         
-        guard let url = URL(string: "https://0xmade-ens.vercel.app/api/ens/resolve?name=\(ensName)") else {
-            print("Invalid URL")
+        if let known = Self.wellKnownENS[ensName.lowercased()] {
+            DispatchQueue.main.async {
+                self.loading = false
+                self.addWallet(address: known)
+            }
+            return
+        }
+        
+        let encodedName = ensName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ensName
+        guard let url = URL(string: "https://api.ensdata.net/\(encodedName)") else {
+            DispatchQueue.main.async {
+                self.loading = false
+                self.showAlert = true
+            }
             return
         }
                 
-        let request = URLRequest(url: url)
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 5
         
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                if let decodedResponse = try? JSONDecoder().decode(ReverseENSLookupResponse.self, from: data) {
-                    DispatchQueue.main.async {
-                        self.loading = false
-                        addWallet(address: decodedResponse.address)
-                    }
-                    
-                    return
+            if let data = data,
+               let decodedResponse = try? JSONDecoder().decode(ReverseENSLookupResponse.self, from: data),
+               !decodedResponse.address.isEmpty {
+                DispatchQueue.main.async {
+                    self.loading = false
+                    addWallet(address: decodedResponse.address)
                 }
+                return
             }
             
-            self.loading = false
-            self.showAlert = true
-
-            // if we're still here it means there was a problem
+            DispatchQueue.main.async {
+                self.loading = false
+                self.showAlert = true
+            }
             print("failed: \(error?.localizedDescription ?? "Unknown error")")
         }.resume()
     }

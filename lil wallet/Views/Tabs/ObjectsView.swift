@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct ObjectsView: View {
     @State private var showActivityView = false
@@ -20,7 +21,7 @@ struct ObjectsView: View {
     private var wallets: FetchedResults<WalletAddress>
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 if wallet.loadingObjects {
                     VStack {
@@ -32,18 +33,18 @@ struct ObjectsView: View {
                     VStack {
                         Spacer()
                         Text("No wallets")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.system(.body, design: appearance.getAppFont()))
                         Button(action: { showAddWalletView = true }, label: {
                             Text("Add wallet")
                                 .font(.headline)
                         })
-                        .buttonStyle(BorderedButtonStyle())
+                        .buttonStyle(.bordered)
                         .sheet(isPresented: $showAddWalletView) {
-                            NavigationView { AddWalletView() }
+                            NavigationStack { AddWalletView() }
                                 .environmentObject(wallet)
                                 .environmentObject(appearance)
-                                .accentColor(appearance.getAppColor())
+                                .tint(appearance.getAppColor())
                         }
                         Spacer()
                     }
@@ -51,7 +52,7 @@ struct ObjectsView: View {
                     VStack {
                         Spacer()
                         Text("No objects")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.system(.body, design: appearance.getAppFont()))
                         Spacer()
                     }
@@ -68,29 +69,32 @@ struct ObjectsView: View {
                         }
                         .padding()
                     }
+                    .refreshable {
+                        self.wallet.reload(reset: false, refresh: true)
+                    }
                 }
             }
-            .listStyle(PlainListStyle())
+            .listStyle(.plain)
             .navigationTitle("Objects")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showActivityView.toggle() }, label: { Image(systemName: "clock").font(.headline) })
-                    .sheet(isPresented: $showActivityView) {
-                        ActivityView()
-                            .environmentObject(wallet)
-                            .environmentObject(appearance)
-                    }
+                        .sheet(isPresented: $showActivityView) {
+                            ActivityView()
+                                .environmentObject(wallet)
+                                .environmentObject(appearance)
+                        }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showSettingsView.toggle() }, label: { Image(systemName: "gear").font(.headline) })
-                    .sheet(isPresented: $showSettingsView) {
-                        SettingsView(showSettingsView: $showSettingsView)
-                            .environmentObject(wallet)
-                            .environmentObject(appearance)
-                            .environment(\.managedObjectContext, viewContext)
-                    }
+                        .sheet(isPresented: $showSettingsView) {
+                            SettingsView(showSettingsView: $showSettingsView)
+                                .environmentObject(wallet)
+                                .environmentObject(appearance)
+                                .environment(\.managedObjectContext, viewContext)
+                        }
                 }
             }
         }

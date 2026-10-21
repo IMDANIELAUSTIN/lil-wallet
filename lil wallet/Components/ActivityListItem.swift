@@ -29,14 +29,14 @@ struct ActivityListItem: View {
                         
                         Text("\(wallet.formatCurrency(value: transaction.transactionValue()))")
                             .font(.system(.callout, design: appFont))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
                     
                     Text(Date(timeIntervalSince1970: TimeInterval(transaction.mined_at)).formatted(date: .abbreviated, time: .omitted))
                         .lineLimit(1)
                         .font(.system(.body, design: appFont))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             .padding(.vertical, 10)

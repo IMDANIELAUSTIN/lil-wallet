@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct CoinsView: View {
     @State private var showActivityView = false
@@ -22,7 +23,7 @@ struct CoinsView: View {
     private var wallets: FetchedResults<WalletAddress>
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 if wallet.loadingTokens {
                     VStack {
@@ -34,18 +35,18 @@ struct CoinsView: View {
                     VStack {
                         Spacer()
                         Text("No wallets")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.system(.body, design: appearance.getAppFont()))
                         Button(action: { showAddWalletView = true }, label: {
                             Text("Add wallet")
                                 .font(.headline)
                         })
-                        .buttonStyle(BorderedButtonStyle())
+                        .buttonStyle(.bordered)
                         .sheet(isPresented: $showAddWalletView) {
-                            NavigationView { AddWalletView() }
+                            NavigationStack { AddWalletView() }
                                 .environmentObject(wallet)
                                 .environmentObject(appearance)
-                                .accentColor(appearance.getAppColor())
+                                .tint(appearance.getAppColor())
                         }
                         Spacer()
                     }
@@ -53,7 +54,7 @@ struct CoinsView: View {
                     VStack {
                         Spacer()
                         Text("No crypto")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.system(.body, design: appearance.getAppFont()))
                         Spacer()
                     }
@@ -66,7 +67,7 @@ struct CoinsView: View {
                                 .listRowSeparator(.hidden)
                         }
                     }
-                    .listStyle(PlainListStyle())
+                    .listStyle(.plain)
                     .refreshable {
                         self.wallet.reload(reset: false, refresh: true)
                     }
@@ -76,21 +77,21 @@ struct CoinsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showActivityView.toggle() }, label: { Image(systemName: "clock").font(.headline) })
-                    .sheet(isPresented: $showActivityView) {
-                        ActivityView()
-                            .environmentObject(wallet)
-                            .environmentObject(appearance)
-                    }
+                        .sheet(isPresented: $showActivityView) {
+                            ActivityView()
+                                .environmentObject(wallet)
+                                .environmentObject(appearance)
+                        }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showSettingsView.toggle() }, label: { Image(systemName: "gear").font(.headline) })
-                    .sheet(isPresented: $showSettingsView) {
-                        SettingsView(showSettingsView: $showSettingsView)
-                            .environmentObject(wallet)
-                            .environmentObject(appearance)
-                            .environment(\.managedObjectContext, viewContext)
-                    }
+                        .sheet(isPresented: $showSettingsView) {
+                            SettingsView(showSettingsView: $showSettingsView)
+                                .environmentObject(wallet)
+                                .environmentObject(appearance)
+                                .environment(\.managedObjectContext, viewContext)
+                        }
                 }
             }
         }

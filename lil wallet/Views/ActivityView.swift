@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct ActivityView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
     @State var loading = true
     @State var loadingError = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 if wallet.loadingTransactions {
                     VStack {
@@ -27,7 +27,7 @@ struct ActivityView: View {
                     VStack {
                         Spacer()
                         Text("No activity")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .font(.system(.body, design: appearance.getAppFont()))
                         Spacer()
                     }
@@ -42,20 +42,20 @@ struct ActivityView: View {
                     }
                 }
             }
-            .listStyle(PlainListStyle())
+            .listStyle(.plain)
             .navigationTitle("Activity")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
-                        presentationMode.wrappedValue.dismiss()
+                        dismiss()
                     } label: {
                         Text("Done")
                     }
                 }
             }
         }
-        .accentColor(appearance.getAppColor())
+        .tint(appearance.getAppColor())
     }
 }
 

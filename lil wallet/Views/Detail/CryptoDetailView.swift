@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct CryptoDetailView: View {
-    @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var token: Token
@@ -32,18 +31,18 @@ struct CryptoDetailView: View {
                                 .font(.system(.body, design: appFont))
                                 .multilineTextAlignment(.center)
                         }
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     }
                     .padding(.horizontal)
                     Spacer()
                 }
                 .padding(.vertical, 24)
             })
-                .listRowBackground(
-                    colorScheme == .light ?
-                        Color(UIColor.secondarySystemBackground) :
-                        Color(UIColor.systemBackground)
-                )
+            .listRowBackground(
+                colorScheme == .light ?
+                    Color(UIColor.secondarySystemBackground) :
+                    Color(UIColor.systemBackground)
+            )
             
             Section(content: {
                 HStack {
@@ -52,7 +51,7 @@ struct CryptoDetailView: View {
                     Spacer()
                     Label(token.percentChange(), systemImage: token.percentChange().contains("-") ? "arrow.down" : "arrow.up")
                         .font(.system(.headline, design: appFont))
-                        .foregroundColor(token.percentChange().contains("-") ? .red : .green)
+                        .foregroundStyle(token.percentChange().contains("-") ? .red : .green)
                 }
             })
             
@@ -77,13 +76,15 @@ struct CryptoDetailView: View {
                 Text("Wallet")
             })
             
-            Section {
-                Link(destination: URL(string: "https://etherscan.io/token/\(token.id)?a=\(wallet.currentWalletAddress)")!, label: {
-                    Text("View on Etherscan")
-                        .font(.system(.body, design: appFont))
-                })
+            if let etherscanURL = URL(string: "https://etherscan.io/token/\(token.id)?a=\(wallet.currentWalletAddress)") {
+                Section {
+                    Link(destination: etherscanURL, label: {
+                        Text("View on Etherscan")
+                            .font(.system(.body, design: appFont))
+                    })
+                }
+                .foregroundStyle(appearance.getAppColor())
             }
-            .foregroundColor(appearance.getAppColor())
         }
         .navigationTitle(token.name)
         .navigationBarTitleDisplayMode(.inline)

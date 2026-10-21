@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ActivityDetailView: View {
-    @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var transaction: Transaction
     @EnvironmentObject var appearance: Appearance
@@ -29,7 +28,7 @@ struct ActivityDetailView: View {
                         
                         Text(Date(timeIntervalSince1970: TimeInterval(transaction.mined_at)).formatted(date: .abbreviated, time: .shortened))
                             .font(.system(.body, design: appFont))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
                     .padding(.horizontal)
@@ -37,11 +36,11 @@ struct ActivityDetailView: View {
                 }
                 .padding(.vertical, 24)
             })
-                .listRowBackground(
-                    colorScheme == .light ?
-                        Color(UIColor.secondarySystemBackground) :
-                        Color(UIColor.systemBackground)
-                )
+            .listRowBackground(
+                colorScheme == .light ?
+                    Color(UIColor.secondarySystemBackground) :
+                    Color(UIColor.systemBackground)
+            )
             
             Section(content: {
                 HStack {
@@ -70,8 +69,9 @@ struct ActivityDetailView: View {
             })
             
             Section(content: {
-                if let address_from = transaction.address_from {
-                    Link(destination: URL(string: "https://etherscan.io/address/\(address_from)")!, label: {
+                if let address_from = transaction.address_from,
+                   let fromURL = URL(string: "https://etherscan.io/address/\(address_from)") {
+                    Link(destination: fromURL, label: {
                         HStack {
                             Text("From")
                                 .font(.system(.body, design: appFont))
@@ -82,8 +82,9 @@ struct ActivityDetailView: View {
                     })
                 }
                 
-                if let address_to = transaction.address_to {
-                    Link(destination: URL(string: "https://etherscan.io/address/\(address_to)")!, label: {
+                if let address_to = transaction.address_to,
+                   let toURL = URL(string: "https://etherscan.io/address/\(address_to)") {
+                    Link(destination: toURL, label: {
                         HStack {
                             Text("To")
                                 .font(.system(.body, design: appFont))
@@ -94,7 +95,7 @@ struct ActivityDetailView: View {
                     })
                 }
             })
-            .foregroundColor(.primary)
+            .foregroundStyle(.primary)
             
             if let token = transaction.token {
                 Section(content: {
@@ -140,15 +141,17 @@ struct ActivityDetailView: View {
                 }, header: { Text("Fee") })
             }
 
-            Section {
-                Link(destination: URL(string: "https://etherscan.io/tx/\(transaction.hash)")!, label: {
-                    Text("View on Etherscan")
-                        .font(.system(.body, design: appFont))
-                })
+            if let txURL = URL(string: "https://etherscan.io/tx/\(transaction.hash)") {
+                Section {
+                    Link(destination: txURL, label: {
+                        Text("View on Etherscan")
+                            .font(.system(.body, design: appFont))
+                    })
+                }
+                .foregroundStyle(appearance.getAppColor())
             }
-            .foregroundColor(appearance.getAppColor())
         }
-        .navigationBarTitle(transaction.title())
+        .navigationTitle(transaction.title())
         .navigationBarTitleDisplayMode(.inline)
     }
 }

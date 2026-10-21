@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 class Appearance: ObservableObject {
     @AppStorage("appColor") private var appColor = AppColor.monochrome
@@ -73,36 +74,33 @@ enum AppFont: String, Hashable, CaseIterable {
 }
 
 struct ImageView: View {
-    @ObservedObject var remoteImageURL: RemoteImageURL
+    let imageUrl: String
     
     init(imageUrl: String) {
-        remoteImageURL = RemoteImageURL(imageURL: imageUrl)
+        self.imageUrl = imageUrl
     }
     
     var body: some View {
-        Image(uiImage: UIImage(data: self.remoteImageURL.data) ?? UIImage())
-            .resizable()
-            .aspectRatio(1, contentMode: .fill)
-    }
-}
-
-class RemoteImageURL: ObservableObject {
-    @Published var data = Data()
-    
-    // load our image URL
-    init(imageURL: String) {
-        guard let url = URL(string: imageURL) else {
-            print("Invalid URL")
-            return
-        }
-      
-        let request = URLRequest(url: url)
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data, let _ = response {
-                DispatchQueue.main.async {
-                    self.data = data
-                }
+        AsyncImage(url: URL(string: imageUrl)) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .aspectRatio(1, contentMode: .fill)
+            case .failure:
+                Color(UIColor.secondarySystemBackground)
+                    .overlay {
+                        Image(systemName: "photo")
+                            .foregroundStyle(.secondary)
+                    }
+                    .aspectRatio(1, contentMode: .fill)
+            case .empty:
+                Color(UIColor.secondarySystemBackground)
+                    .aspectRatio(1, contentMode: .fill)
+            @unknown default:
+                Color(UIColor.secondarySystemBackground)
+                    .aspectRatio(1, contentMode: .fill)
             }
-        }.resume()
+        }
     }
 }

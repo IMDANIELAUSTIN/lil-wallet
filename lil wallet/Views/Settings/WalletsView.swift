@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct WalletsView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -25,30 +26,31 @@ struct WalletsView: View {
                 VStack {
                     Spacer()
                     Text("No wallets")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .font(.system(.body, design: appearance.getAppFont()))
                     Spacer()
                 }
             } else {
                 List {
                     Section {
-                        ForEach(wallets, id: \.createdAt) { savedWallet in
+                        ForEach(wallets, id: \.objectID) { savedWallet in
                             Button(action: { setCurrentWalletAddress(address: savedWallet.address ?? "") }, label: {
                                 Label {
                                     HStack {
                                         Text(savedWallet.name ?? "Wallet")
-                                            .foregroundColor(.primary)
+                                            .foregroundStyle(.primary)
                                             .font(.system(.body, design: appFont))
                                             .lineLimit(1)
                                         Spacer()
                                         Text(wallet.formatAddress(address: savedWallet.address ?? ""))
                                             .font(.system(.body, design: .monospaced))
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                             .lineLimit(1)
                                     }
                                 } icon: {
-                                    Image(systemName: currentWalletAddress == savedWallet.address ? "checkmark" : "")
+                                    Image(systemName: "checkmark")
                                         .font(.headline)
+                                        .opacity(currentWalletAddress == savedWallet.address ? 1 : 0)
                                 }
                             })
                         }
