@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct ActivityListItem: View {
-    @EnvironmentObject var transaction: Transaction
     @EnvironmentObject var appearance: Appearance
     @EnvironmentObject var wallet: Wallet
+    let transaction: Transaction
     
     var body: some View {
         let appFont = appearance.getAppFont()
         
-        NavigationLink(destination: ActivityDetailView().environmentObject(transaction), label: {
+        NavigationLink(destination: ActivityDetailView(transaction: transaction), label: {
             HStack(alignment: .center, spacing: 12) {
                 AvatarView(text: transaction.token == nil ? transaction.type : transaction.token?.name ?? "", iconURL: transaction.token?.iconURL ?? nil)
                 
@@ -46,6 +46,6 @@ struct ActivityListItem: View {
 
 struct ActivityListItem_Previews: PreviewProvider {
     static var previews: some View {
-        ActivityListItem()
+        ActivityListItem(transaction: Transaction(id: "tx-1", token: nil, value: 0, price: 0, type: "receive", mined_at: 0, hash: "", status: "confirmed", block_number: 0, address_from: nil, address_to: nil, fee: nil))
     }
 }

@@ -10,8 +10,8 @@ import WebKit
 
 struct ObjectDetailView: View {
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var object: OpenSeaAsset
     @EnvironmentObject var appearance: Appearance
+    let object: OpenSeaAsset
     
     var body: some View {
         let appFont = appearance.getAppFont()
@@ -27,7 +27,7 @@ struct ObjectDetailView: View {
                             .aspectRatio(contentMode: .fit)
                     } placeholder: {
                         Rectangle()
-                            .foregroundStyle(Color(UIColor.secondarySystemBackground))
+                            .foregroundStyle(Color(.secondarySystemBackground))
                             .aspectRatio(1, contentMode: .fit)
                     }
                 }
@@ -95,7 +95,15 @@ struct ObjectDetailView: View {
 struct WebView: UIViewRepresentable {
     let loadURL: String
     
-    func makeUIView(context: Context) -> WKWebView  {
+    final class Coordinator {
+        var lastLoadedURL: String?
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
         webView.scrollView.isScrollEnabled = false
         webView.isUserInteractionEnabled = false
@@ -105,6 +113,9 @@ struct WebView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
+        guard context.coordinator.lastLoadedURL != loadURL else { return }
+        context.coordinator.lastLoadedURL = loadURL
+        
         if loadURL.hasPrefix("data:image/svg+xml") {
             let html = """
             <html>
@@ -134,6 +145,6 @@ struct WebView: UIViewRepresentable {
 
 struct ObjectDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        ObjectDetailView()
+        ObjectDetailView(object: Wallet.demoObjects()[0])
     }
 }

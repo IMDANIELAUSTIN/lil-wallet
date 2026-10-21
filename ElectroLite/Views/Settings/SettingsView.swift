@@ -94,15 +94,15 @@ struct SettingsView: View {
                         Spacer()
                         Image(systemName: "square.on.circle")
                             .font(.system(size: 24, weight: .semibold))
-                            .foregroundStyle(Color(UIColor.tertiaryLabel))
+                            .foregroundStyle(.tertiary)
                         Spacer()
                     }
                     .padding(.vertical, 24)
                 }
                 .listRowBackground(
                     colorScheme == .light ?
-                        Color(UIColor.secondarySystemBackground) :
-                        Color(UIColor.systemBackground)
+                        Color(.secondarySystemBackground) :
+                        Color(.systemBackground)
                 )
             }
             .navigationTitle("Settings")
@@ -115,7 +115,7 @@ struct SettingsView: View {
         }
         .tint(appearance.getAppColor())
         .fontDesign(appFont)
-        .onChange(of: appFont) { _ in
+        .onChange(of: appFont) {
             appearance.updateNavBarTypography()
         }
     }

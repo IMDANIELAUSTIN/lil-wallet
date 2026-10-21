@@ -9,13 +9,13 @@ import SwiftUI
 
 struct CryptoListItem: View {
     @EnvironmentObject var wallet: Wallet
-    @EnvironmentObject var token: Token
     @EnvironmentObject var appearance: Appearance
+    let token: Token
     
     var body: some View {
         let appFont = appearance.getAppFont()
         
-        NavigationLink(destination: CryptoDetailView().environmentObject(token), label: {
+        NavigationLink(destination: CryptoDetailView(token: token), label: {
             HStack(alignment: .center, spacing: 12) {
                 AvatarView(text: token.name, iconURL: token.iconURL)
                 
@@ -44,6 +44,6 @@ struct CryptoListItem: View {
 
 struct CurrencyListItem_Previews: PreviewProvider {
     static var previews: some View {
-        CryptoListItem()
+        CryptoListItem(token: Token(id: "eth", name: "Ethereum", symbol: "ETH", quantity: "1000000000000000000", price: Price(value: 2650, relative_change: 2.45), iconURL: nil))
     }
 }

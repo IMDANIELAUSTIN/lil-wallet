@@ -43,7 +43,7 @@ class Wallet: ObservableObject {
     @AppStorage("currentWalletAddress") var currentWalletAddress: String = ""
     @AppStorage("openSeaAPIKey") var openSeaAPIKey: String = ""
     @Published var network = Network()
-    @Published var value: NSNumber = 0
+    @Published var value: Double = 0
     @Published var tokens: [Token] = []
     @Published var objects: [OpenSeaAsset] = []
     @Published var transactions: [Transaction] = []
@@ -56,18 +56,19 @@ class Wallet: ObservableObject {
     
     private var fallbackTask: Task<Void, Never>?
     
+    private static let currencyFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        return formatter
+    }()
+    
     init() {
         reload(reset: false, refresh: false)
     }
     
-    func formatCurrency(value: NSNumber) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-
-        let total = Double(truncating: value)
-
-        return formatter.string(from: NSNumber(value: total)) ?? "$0"
+    func formatCurrency(value: Double) -> String {
+        Self.currencyFormatter.string(from: NSNumber(value: value)) ?? "$0.00"
     }
     
     func formatAddress(address: String) -> String {
@@ -193,12 +194,12 @@ class Wallet: ObservableObject {
                         symbol: item.symbol,
                         quantity: item.quantity,
                         price: Price(
-                            value: NSNumber(value: item.priceValue ?? 0),
-                            relative_change: NSNumber(value: item.relativeChange ?? 0)
+                            value: item.priceValue ?? 0,
+                            relative_change: item.relativeChange ?? 0
                         ),
                         iconURL: item.iconURL
                     )
-                }
+                }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
                 self.loadingTokens = false
             }
         }
@@ -216,7 +217,7 @@ class Wallet: ObservableObject {
             let finalTotal = parsedTotal
             Task { @MainActor [weak self] in
                 guard let self = self, let finalTotal = finalTotal else { return }
-                self.value = NSNumber(value: finalTotal)
+                self.value = finalTotal
                 self.loadingPortfolio = false
             }
         }
@@ -294,15 +295,15 @@ class Wallet: ObservableObject {
                     }
                     let feeObj: Fee?
                     if item.feeValue != nil || item.feePrice != nil {
-                        feeObj = Fee(value: NSNumber(value: item.feeValue ?? 0), price: NSNumber(value: item.feePrice ?? 0))
+                        feeObj = Fee(value: item.feeValue ?? 0, price: item.feePrice ?? 0)
                     } else {
                         feeObj = nil
                     }
                     return Transaction(
                         id: item.id,
                         token: tok,
-                        value: item.value.map { NSNumber(value: $0) },
-                        price: item.price.map { NSNumber(value: $0) },
+                        value: item.value,
+                        price: item.price,
                         type: item.type,
                         mined_at: item.minedAt,
                         hash: item.hash,
@@ -384,7 +385,7 @@ class Wallet: ObservableObject {
             name: "Ethereum",
             symbol: "ETH",
             quantity: ethQuantityWei,
-            price: Price(value: NSNumber(value: priceUSD), relative_change: NSNumber(value: change24h)),
+            price: Price(value: priceUSD, relative_change: change24h),
             iconURL: "https://assets.coingecko.com/coins/images/279/small/ethereum.png"
         )
         
@@ -407,18 +408,20 @@ class Wallet: ObservableObject {
         )
         
         if self.loadingTokens {
-            let tokenList = [ethToken, usdcToken, ensToken]
+            let tokenList = [ethToken, usdcToken, ensToken].sorted {
+                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+            }
             self.tokens = tokenList
             self.loadingTokens = false
             
             if self.loadingPortfolio {
-                let total = tokenList.reduce(0.0) { $0 + Double(truncating: $1.value()) }
-                self.value = NSNumber(value: total)
+                let total = tokenList.reduce(0.0) { $0 + $1.value() }
+                self.value = total
                 self.loadingPortfolio = false
             }
         } else if self.loadingPortfolio {
-            let total = self.tokens.reduce(0.0) { $0 + Double(truncating: $1.value()) }
-            self.value = NSNumber(value: total)
+            let total = self.tokens.reduce(0.0) { $0 + $1.value() }
+            self.value = total
             self.loadingPortfolio = false
         }
         
@@ -428,8 +431,8 @@ class Wallet: ObservableObject {
                 Transaction(
                     id: "tx-1",
                     token: ethToken,
-                    value: NSNumber(value: 0.5 * oneETHinWEI),
-                    price: NSNumber(value: priceUSD),
+                    value: 0.5 * oneETHinWEI,
+                    price: priceUSD,
                     type: "receive",
                     mined_at: now - 3600 * 6,
                     hash: "0x5f9d8c1e7b2a4d3c9f0e1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d",
@@ -437,12 +440,12 @@ class Wallet: ObservableObject {
                     block_number: 21045120,
                     address_from: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
                     address_to: self.currentWalletAddress,
-                    fee: Fee(value: NSNumber(value: 0.00042 * oneETHinWEI), price: NSNumber(value: priceUSD))
+                    fee: Fee(value: 0.00042 * oneETHinWEI, price: priceUSD)
                 ),
                 Transaction(
                     id: "tx-2",
                     token: usdcToken,
-                    value: NSNumber(value: 250.0 * oneETHinWEI),
+                    value: 250.0 * oneETHinWEI,
                     price: 1.00,
                     type: "send",
                     mined_at: now - 86400 * 2,
@@ -451,7 +454,7 @@ class Wallet: ObservableObject {
                     block_number: 21031890,
                     address_from: self.currentWalletAddress,
                     address_to: "0x1db3439a222c519ab44bb1144fc28167b4fa6ee6",
-                    fee: Fee(value: NSNumber(value: 0.00031 * oneETHinWEI), price: NSNumber(value: priceUSD))
+                    fee: Fee(value: 0.00031 * oneETHinWEI, price: priceUSD)
                 )
             ]
             self.loadingTransactions = false
@@ -579,7 +582,7 @@ struct OpenSeaV2NFT: Codable, Sendable {
     }
 }
 
-final class OpenSeaAsset: Codable, ObservableObject, Identifiable, Sendable {
+struct OpenSeaAsset: Codable, Identifiable, Sendable {
     let id: Int
     let image_url: String
     let name: String?
@@ -616,7 +619,7 @@ final class OpenSeaAsset: Codable, ObservableObject, Identifiable, Sendable {
         self.permalink = permalink
     }
     
-    required init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = (try? container.decode(Int.self, forKey: .id)) ?? Int.random(in: 1...999_999)
         self.image_url = (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? ""
@@ -662,16 +665,7 @@ struct OpenSeaAssetTrait: Codable, Identifiable, Sendable {
     }
 }
 
-final class Token: ObservableObject, Identifiable, Sendable {
-    init(id: String, name: String, symbol: String, quantity: String?, price: Price?, iconURL: String?) {
-        self.id = id
-        self.name = name
-        self.symbol = symbol
-        self.quantity = quantity
-        self.price = price
-        self.iconURL = iconURL
-    }
-    
+struct Token: Identifiable, Sendable {
     let id: String
     let name: String
     let symbol: String
@@ -679,22 +673,21 @@ final class Token: ObservableObject, Identifiable, Sendable {
     let price: Price?
     let iconURL: String?
     
-    func value() -> NSNumber {
-        if self.price != nil && self.quantity != nil {
-            return NSNumber(value: Double(truncating: self.price?.value ?? 0) * self.tokenQuantity())
-        } else {
+    func value() -> Double {
+        guard let priceValue = self.price?.value, self.quantity != nil else {
             return 0
         }
+        return priceValue * self.tokenQuantity()
     }
     
     func tokenQuantity() -> Double {
         guard let quantity = self.quantity else { return 0 }
-        return Double((quantity as NSString).doubleValue) / oneETHinWEI
+        return (Double(quantity) ?? 0) / oneETHinWEI
     }
     
     func percentChange() -> String {
         if let relativeChange = self.price?.relative_change {
-            return String(format: "%.2f", Double(truncating: relativeChange)) + "%"
+            return String(format: "%.2f%%", relativeChange)
         } else {
             return "0%"
         }
@@ -702,43 +695,28 @@ final class Token: ObservableObject, Identifiable, Sendable {
 }
 
 struct Price: Sendable {
-    let value: NSNumber
-    let relative_change: NSNumber
+    let value: Double
+    let relative_change: Double
 }
 
 struct Fee: Sendable {
-    let value: NSNumber
-    let price: NSNumber
+    let value: Double
+    let price: Double
     
-    func feePrice() -> NSNumber {
-        return NSNumber(value: Double(truncating: self.price) * self.feeValue())
+    func feePrice() -> Double {
+        return self.price * self.feeValue()
     }
     
     func feeValue() -> Double {
-        return Double(truncating: self.value) / oneETHinWEI
+        return self.value / oneETHinWEI
     }
 }
 
-final class Transaction: ObservableObject, Identifiable, Sendable {
-    init(id: String, token: Token?, value: NSNumber?, price: NSNumber?, type: String, mined_at: Int, hash: String, status: String, block_number: Int, address_from: String?, address_to: String?, fee: Fee?) {
-        self.id = id
-        self.token = token
-        self.value = value
-        self.price = price
-        self.type = type
-        self.mined_at = mined_at
-        self.hash = hash
-        self.status = status
-        self.block_number = block_number
-        self.address_from = address_from
-        self.address_to = address_to
-        self.fee = fee
-    }
-    
+struct Transaction: Identifiable, Sendable {
     let id: String
     let token: Token?
-    let value: NSNumber?
-    let price: NSNumber?
+    let value: Double?
+    let price: Double?
     let type: String
     let mined_at: Int
     let hash: String
@@ -749,15 +727,14 @@ final class Transaction: ObservableObject, Identifiable, Sendable {
     let fee: Fee?
     
     func transactionQuantity() -> Double {
-        return Double(truncating: self.value ?? 0) / oneETHinWEI
+        return (self.value ?? 0) / oneETHinWEI
     }
 
-    func transactionValue() -> NSNumber {
-        if self.price != nil && self.value != nil {
-            return NSNumber(value: Double(truncating: self.price ?? 0) * self.transactionQuantity())
-        } else {
+    func transactionValue() -> Double {
+        guard let price = self.price, self.value != nil else {
             return 0
         }
+        return price * self.transactionQuantity()
     }
     
     func title() -> String {

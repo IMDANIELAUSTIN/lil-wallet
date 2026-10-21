@@ -12,6 +12,7 @@ import Combine
 class Appearance: ObservableObject {
     @AppStorage("appColor") private var appColor = AppColor.monochrome
     @AppStorage("appFont") private var appFont = AppFont.rounded
+    private var lastAppliedFont: AppFont?
     
     init() {
         updateNavBarTypography()
@@ -26,6 +27,9 @@ class Appearance: ObservableObject {
     }
     
     func updateNavBarTypography() {
+        guard lastAppliedFont != appFont else { return }
+        lastAppliedFont = appFont
+        
         let titleFont = UIFont.systemFont(ofSize: 17, weight: .semibold)
         let largeTitleFont = UIFont.systemFont(ofSize: 34, weight: .bold)
         
@@ -119,24 +123,27 @@ struct ImageView: View {
     }
     
     var body: some View {
-        AsyncImage(url: URL(string: imageUrl)) { phase in
+        AsyncImage(
+            url: URL(string: imageUrl),
+            transaction: SwiftUI.Transaction(animation: .easeInOut(duration: 0.15))
+        ) { phase in
             switch phase {
             case .success(let image):
                 image
                     .resizable()
                     .aspectRatio(1, contentMode: .fill)
             case .failure:
-                Color(UIColor.secondarySystemBackground)
+                Color(.secondarySystemBackground)
                     .overlay {
                         Image(systemName: "photo")
                             .foregroundStyle(.secondary)
                     }
                     .aspectRatio(1, contentMode: .fill)
             case .empty:
-                Color(UIColor.secondarySystemBackground)
+                Color(.secondarySystemBackground)
                     .aspectRatio(1, contentMode: .fill)
             @unknown default:
-                Color(UIColor.secondarySystemBackground)
+                Color(.secondarySystemBackground)
                     .aspectRatio(1, contentMode: .fill)
             }
         }

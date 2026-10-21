@@ -73,11 +73,8 @@ struct AddWalletView: View {
         .navigationTitle("Add Wallet")
         .navigationBarTitleDisplayMode(.inline)
         .fontDesign(appearance.getAppFont())
-        .onAppear(perform: { autofocus() })
-    }
-    
-    func autofocus() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+        .task {
+            try? await Task.sleep(for: .milliseconds(750))
             self.focusedField = .name
         }
     }

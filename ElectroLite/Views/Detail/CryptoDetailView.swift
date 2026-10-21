@@ -10,8 +10,8 @@ import SwiftUI
 struct CryptoDetailView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var wallet: Wallet
-    @EnvironmentObject var token: Token
     @EnvironmentObject var appearance: Appearance
+    let token: Token
     
     var body: some View {
         let appFont = appearance.getAppFont()
@@ -40,8 +40,8 @@ struct CryptoDetailView: View {
             })
             .listRowBackground(
                 colorScheme == .light ?
-                    Color(UIColor.secondarySystemBackground) :
-                    Color(UIColor.systemBackground)
+                    Color(.secondarySystemBackground) :
+                    Color(.systemBackground)
             )
             
             Section(content: {
@@ -94,6 +94,6 @@ struct CryptoDetailView: View {
 
 struct CryptoDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        CryptoDetailView()
+        CryptoDetailView(token: Token(id: "eth", name: "Ethereum", symbol: "ETH", quantity: "1000000000000000000", price: Price(value: 2650, relative_change: 2.45), iconURL: nil))
     }
 }

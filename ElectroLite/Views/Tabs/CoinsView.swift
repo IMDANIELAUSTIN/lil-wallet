@@ -12,8 +12,6 @@ struct CoinsView: View {
     @State private var showActivityView = false
     @State private var showSettingsView = false
     @State private var showAddWalletView = false
-    @State var loading = true
-    @State var loadingError = false
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
     @Environment(\.managedObjectContext) private var viewContext
@@ -60,10 +58,8 @@ struct CoinsView: View {
                     }
                 } else {
                     List {
-                        ForEach(sortedTokens(), id: \.id) { token in
-                            CryptoListItem()
-                                .environmentObject(token)
-                                .environmentObject(appearance)
+                        ForEach(wallet.tokens) { token in
+                            CryptoListItem(token: token)
                                 .listRowSeparator(.hidden)
                         }
                     }
@@ -99,12 +95,6 @@ struct CoinsView: View {
                 }
             }
         }
-    }
-    
-    func sortedTokens() -> [Token] {
-        return wallet.tokens.sorted(by: {
-            $0.name.lowercased() < $1.name.lowercased()
-        })
     }
 }
 

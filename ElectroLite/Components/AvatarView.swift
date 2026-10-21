@@ -20,7 +20,7 @@ struct AvatarView: View {
                 .background(
                     Circle()
                         .frame(width: 40, height: 40)
-                        .foregroundStyle(Color(UIColor.secondarySystemBackground))
+                        .foregroundStyle(Color(.secondarySystemBackground))
                 )
         } else {
             placeholder
@@ -31,7 +31,7 @@ struct AvatarView: View {
         ZStack {
             Text(text.prefix(1).uppercased())
                 .font(.system(.headline, design: appearance.getAppFont()))
-                .foregroundStyle(Color(UIColor.systemBackground))
+                .foregroundStyle(Color(.systemBackground))
         }
         .frame(width: 40, height: 40)
         .background(appearance.getAppColor())

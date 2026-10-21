@@ -9,9 +9,9 @@ import SwiftUI
 
 struct ActivityDetailView: View {
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var transaction: Transaction
     @EnvironmentObject var appearance: Appearance
     @EnvironmentObject var wallet: Wallet
+    let transaction: Transaction
     
     var body: some View {
         let appFont = appearance.getAppFont()
@@ -38,8 +38,8 @@ struct ActivityDetailView: View {
             })
             .listRowBackground(
                 colorScheme == .light ?
-                    Color(UIColor.secondarySystemBackground) :
-                    Color(UIColor.systemBackground)
+                    Color(.secondarySystemBackground) :
+                    Color(.systemBackground)
             )
             
             Section(content: {
@@ -159,6 +159,6 @@ struct ActivityDetailView: View {
 
 struct ActivityDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        ActivityDetailView()
+        ActivityDetailView(transaction: Transaction(id: "tx-1", token: nil, value: 0, price: 0, type: "receive", mined_at: 0, hash: "", status: "confirmed", block_number: 0, address_from: nil, address_to: nil, fee: nil))
     }
 }

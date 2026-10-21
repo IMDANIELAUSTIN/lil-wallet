@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct ObjectGridItem: View {
-    @EnvironmentObject var object: OpenSeaAsset
     @EnvironmentObject var appearance: Appearance
+    let object: OpenSeaAsset
     
     var body: some View {
-        NavigationLink(destination: ObjectDetailView().environmentObject(object), label: {
+        NavigationLink(destination: ObjectDetailView(object: object), label: {
             if object.isSVG() {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -22,7 +22,7 @@ struct ObjectGridItem: View {
                     Text(object.name ?? "Untitled")
                         .font(.system(.caption, design: appearance.getAppFont()))
                         .fontWeight(.semibold)
-                        .foregroundStyle(Color(UIColor.systemBackground))
+                        .foregroundStyle(Color(.systemBackground))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                         .lineLimit(3)
@@ -32,7 +32,7 @@ struct ObjectGridItem: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .foregroundStyle(Color(UIColor.secondarySystemBackground))
+                            .foregroundStyle(Color(.secondarySystemBackground))
                             .aspectRatio(1, contentMode: .fill)
                     )
             }
@@ -42,6 +42,6 @@ struct ObjectGridItem: View {
 
 struct ObjectGridItem_Previews: PreviewProvider {
     static var previews: some View {
-        ObjectGridItem()
+        ObjectGridItem(object: Wallet.demoObjects()[0])
     }
 }

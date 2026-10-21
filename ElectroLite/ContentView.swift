@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreData
-import Combine
 
 struct ContentView: View {
     @State var activeTab = 0
@@ -15,7 +14,6 @@ struct ContentView: View {
     @EnvironmentObject var appearance: Appearance
     @Environment(\.managedObjectContext) private var viewContext
     @State private var timeRemaining = 3
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
         ZStack {
@@ -60,10 +58,9 @@ struct ContentView: View {
         .onAppear {
             appearance.updateNavBarTypography()
         }
-        .onReceive(timer) { _ in
-            if self.timeRemaining > 0 {
-                self.timeRemaining -= 1
-            }
+        .task {
+            try? await Task.sleep(for: .seconds(3))
+            self.timeRemaining = 0
         }
     }
     
@@ -76,18 +73,29 @@ struct ContentView: View {
 private struct TabBarConfigurator: UIViewRepresentable {
     var activeTab: Int
     
+    private static let symbolConfig: UIImage.SymbolConfiguration = {
+        let font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        let descriptor = font.fontDescriptor.withDesign(.rounded) ?? font.fontDescriptor
+        let roundedFont = UIFont(descriptor: descriptor, size: 20)
+        return UIImage.SymbolConfiguration(font: roundedFont)
+    }()
+    
+    private static let banknoteImage = UIImage(systemName: "banknote", withConfiguration: symbolConfig)
+    private static let banknoteFillImage = UIImage(systemName: "banknote.fill", withConfiguration: symbolConfig)
+    private static let shippingboxImage = UIImage(systemName: "shippingbox", withConfiguration: symbolConfig)
+    private static let shippingboxFillImage = UIImage(systemName: "shippingbox.fill", withConfiguration: symbolConfig)
+    
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(50))
             self.configureTabBar(from: view)
         }
         return view
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.configureTabBar(from: uiView)
-        }
+        self.configureTabBar(from: uiView)
     }
     
     private func findTabBar(in root: UIView) -> UITabBar? {
@@ -107,17 +115,13 @@ private struct TabBarConfigurator: UIViewRepresentable {
             return
         }
         
-        let font = UIFont.systemFont(ofSize: 20, weight: .regular)
-        let descriptor = font.fontDescriptor.withDesign(.rounded) ?? font.fontDescriptor
-        let roundedFont = UIFont(descriptor: descriptor, size: 20)
-        let config = UIImage.SymbolConfiguration(font: roundedFont)
-        
         if let items = tabBar.items, items.count >= 2 {
-            items[0].image = UIImage(systemName: "banknote", withConfiguration: config)
-            items[0].selectedImage = UIImage(systemName: "banknote.fill", withConfiguration: config)
-            
-            items[1].image = UIImage(systemName: "shippingbox", withConfiguration: config)
-            items[1].selectedImage = UIImage(systemName: "shippingbox.fill", withConfiguration: config)
+            if items[0].image !== Self.banknoteImage {
+                items[0].image = Self.banknoteImage
+                items[0].selectedImage = Self.banknoteFillImage
+                items[1].image = Self.shippingboxImage
+                items[1].selectedImage = Self.shippingboxFillImage
+            }
         }
     }
 }

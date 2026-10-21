@@ -62,9 +62,8 @@ struct ObjectsView: View {
                             GridItem(.flexible(minimum: 40)),
                             GridItem(.flexible(minimum: 40))
                         ]) {
-                            ForEach(wallet.objects, id: \.id) { object in
-                                ObjectGridItem()
-                                    .environmentObject(object)
+                            ForEach(wallet.objects) { object in
+                                ObjectGridItem(object: object)
                             }
                         }
                         .padding()
