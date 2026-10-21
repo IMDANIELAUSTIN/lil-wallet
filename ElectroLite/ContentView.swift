@@ -1,8 +1,8 @@
 //
 //  ContentView.swift
-//  lil wallet
+//  ElectroLite
 //
-//  Created by Jordan Singer on 11/28/21.
+//  Created by Daniel Lee Austin on 11/28/21.
 //
 
 import SwiftUI
@@ -34,22 +34,25 @@ struct ContentView: View {
                         .environmentObject(wallet)
                         .environment(\.managedObjectContext, viewContext)
                         .tabItem {
-                            Image(systemName: "circle")
+                            Image(systemName: activeTab == 0 ? "banknote.fill" : "banknote")
+                                .font(.system(size: 20, design: .rounded))
                                 .environment(\.symbolVariants, activeTab == 0 ? .fill : .none)
-                            Text("Coins")
+                            Text("Money")
                         }
                         .tag(0)
                     
                     ObjectsView()
                         .environment(\.managedObjectContext, viewContext)
                         .tabItem {
-                            Image(systemName: "app")
+                            Image(systemName: activeTab == 1 ? "shippingbox.fill" : "shippingbox")
+                                .font(.system(size: 20, design: .rounded))
                                 .environment(\.symbolVariants, activeTab == 1 ? .fill : .none)
                             Text("Objects")
                         }
                         .tag(1)
                 }
                 .tint(appearance.getAppColor())
+                .background(TabBarConfigurator(activeTab: activeTab))
             }
         }
         .animation(.easeInOut(duration: 0.16), value: showLaunchScreen())
@@ -63,6 +66,55 @@ struct ContentView: View {
     func showLaunchScreen() -> Bool {
         // show launch screen if we're waiting for portfolio/tokens, OR if timer is at 0
         return (wallet.loadingPortfolio || wallet.loadingTokens) && self.timeRemaining > 0
+    }
+}
+
+private struct TabBarConfigurator: UIViewRepresentable {
+    var activeTab: Int
+    
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.configureTabBar(from: view)
+        }
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.configureTabBar(from: uiView)
+        }
+    }
+    
+    private func findTabBar(in root: UIView) -> UITabBar? {
+        if let bar = root as? UITabBar { return bar }
+        for subview in root.subviews {
+            if let bar = findTabBar(in: subview) { return bar }
+        }
+        return nil
+    }
+    
+    private func configureTabBar(from view: UIView) {
+        guard let window = view.window ?? UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow }),
+            let tabBar = findTabBar(in: window) else {
+            return
+        }
+        
+        let font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        let descriptor = font.fontDescriptor.withDesign(.rounded) ?? font.fontDescriptor
+        let roundedFont = UIFont(descriptor: descriptor, size: 20)
+        let config = UIImage.SymbolConfiguration(font: roundedFont)
+        
+        if let items = tabBar.items, items.count >= 2 {
+            items[0].image = UIImage(systemName: "banknote", withConfiguration: config)
+            items[0].selectedImage = UIImage(systemName: "banknote.fill", withConfiguration: config)
+            
+            items[1].image = UIImage(systemName: "shippingbox", withConfiguration: config)
+            items[1].selectedImage = UIImage(systemName: "shippingbox.fill", withConfiguration: config)
+        }
     }
 }
 

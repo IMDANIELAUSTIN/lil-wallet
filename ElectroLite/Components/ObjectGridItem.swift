@@ -1,8 +1,8 @@
 //
 //  ObjectGridItem.swift
-//  lil wallet
+//  ElectroLite
 //
-//  Created by Jordan Singer on 11/28/21.
+//  Created by Daniel Lee Austin on 11/28/21.
 //
 
 import SwiftUI

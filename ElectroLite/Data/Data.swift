@@ -2,8 +2,9 @@
 //  Data.swift
 //  ElectroLite
 //
-//  Created by Jordan Singer on 11/28/21.
 //
+//  Created and All Rights Reserved by Daniel Lee Austin on Oct/21/2026.
+
 
 import Foundation
 import CoreGraphics

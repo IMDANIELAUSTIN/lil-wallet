@@ -1,8 +1,8 @@
 //
 //  ObjectsView.swift
-//  lil wallet
+//  ElectroLite
 //
-//  Created by Jordan Singer on 11/28/21.
+//  Created by Daniel Lee Austin on 11/28/21.
 //
 
 import SwiftUI
@@ -85,6 +85,10 @@ struct ObjectsView: View {
                                 .environmentObject(wallet)
                                 .environmentObject(appearance)
                         }
+                }
+                
+                if #available(iOS 26.0, *) {
+                    ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {

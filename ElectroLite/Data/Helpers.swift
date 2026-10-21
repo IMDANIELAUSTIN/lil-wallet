@@ -2,7 +2,7 @@
 //  Helpers.swift
 //  ElectroLite
 //
-//  Created by Jordan Singer on 11/29/21.
+//  Created by Daniel Lee Austin on 11/29/21.
 //
 
 import SwiftUI
