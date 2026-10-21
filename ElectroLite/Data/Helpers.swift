@@ -1,6 +1,6 @@
 //
 //  Helpers.swift
-//  lil wallet
+//  ElectroLite
 //
 //  Created by Jordan Singer on 11/29/21.
 //
@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 
+@MainActor
 class Appearance: ObservableObject {
     @AppStorage("appColor") private var appColor = AppColor.monochrome
     @AppStorage("appFont") private var appFont = AppFont.regular
@@ -21,7 +22,7 @@ class Appearance: ObservableObject {
     }
 }
 
-enum AppColor: String, Hashable, CaseIterable {
+enum AppColor: String, Hashable, CaseIterable, Sendable {
     case monochrome
     case red
     case orange
@@ -53,7 +54,7 @@ enum AppColor: String, Hashable, CaseIterable {
     }
 }
 
-enum AppFont: String, Hashable, CaseIterable {
+enum AppFont: String, Hashable, CaseIterable, Sendable {
     case regular
     case rounded
     case monospaced

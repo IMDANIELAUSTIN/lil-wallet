@@ -16,7 +16,7 @@
 		8621330B2753E3EA002BD765 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8621330A2753E3EA002BD765 /* Assets.xcassets */; };
 		8621330E2753E3EA002BD765 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8621330D2753E3EA002BD765 /* Preview Assets.xcassets */; };
 		862133102753E3EA002BD765 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621330F2753E3EA002BD765 /* Persistence.swift */; };
-		862133132753E3EA002BD765 /* lil_wallet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 862133112753E3EA002BD765 /* lil_wallet.xcdatamodeld */; };
+		862133132753E3EA002BD765 /* ElectroLite.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 862133112753E3EA002BD765 /* ElectroLite.xcdatamodeld */; };
 		862133222753E474002BD765 /* CryptoListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133212753E474002BD765 /* CryptoListItem.swift */; };
 		862133242753E47E002BD765 /* ActivityListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133232753E47E002BD765 /* ActivityListItem.swift */; };
 		862133262753E485002BD765 /* ObjectGridItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133252753E485002BD765 /* ObjectGridItem.swift */; };
@@ -28,6 +28,7 @@
 		862133322753E4CA002BD765 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133312753E4CA002BD765 /* SettingsView.swift */; };
 		862133342753E4D6002BD765 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133332753E4D6002BD765 /* ActivityView.swift */; };
 		86A000032753E3EA002BD765 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 86A000022753E3EA002BD765 /* SocketIO */; };
+		86A000052753E3EA002BD765 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */; };
 		86F4D61927694FC3005094BE /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F4D61827694FC3005094BE /* Data.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,7 +43,7 @@
 		8621330A2753E3EA002BD765 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8621330D2753E3EA002BD765 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8621330F2753E3EA002BD765 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
-		862133122753E3EA002BD765 /* lil_wallet.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = lil_wallet.xcdatamodel; sourceTree = "<group>"; };
+		862133122753E3EA002BD765 /* ElectroLite.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ElectroLite.xcdatamodel; sourceTree = "<group>"; };
 		862133212753E474002BD765 /* CryptoListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoListItem.swift; sourceTree = "<group>"; };
 		862133232753E47E002BD765 /* ActivityListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityListItem.swift; sourceTree = "<group>"; };
 		862133252753E485002BD765 /* ObjectGridItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectGridItem.swift; sourceTree = "<group>"; };
@@ -53,6 +54,7 @@
 		8621332F2753E4C3002BD765 /* ObjectDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetailView.swift; sourceTree = "<group>"; };
 		862133312753E4CA002BD765 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		862133332753E4D6002BD765 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		86F4D61827694FC3005094BE /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -104,7 +106,8 @@
 				862133082753E3E8002BD765 /* ContentView.swift */,
 				8621330A2753E3EA002BD765 /* Assets.xcassets */,
 				8621330F2753E3EA002BD765 /* Persistence.swift */,
-				862133112753E3EA002BD765 /* lil_wallet.xcdatamodeld */,
+				862133112753E3EA002BD765 /* ElectroLite.xcdatamodeld */,
+				86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */,
 				8621330C2753E3EA002BD765 /* Preview Content */,
 			);
 			path = ElectroLite;
@@ -187,7 +190,7 @@
 			packageProductDependencies = (
 				86A000022753E3EA002BD765 /* SocketIO */,
 			);
-			productName = "lil wallet";
+			productName = ElectroLite;
 			productReference = 862133032753E3E8002BD765 /* ElectroLite.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -234,6 +237,7 @@
 			files = (
 				8621330E2753E3EA002BD765 /* Preview Assets.xcassets in Resources */,
 				8621330B2753E3EA002BD765 /* Assets.xcassets in Resources */,
+				86A000052753E3EA002BD765 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,7 +249,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				862133242753E47E002BD765 /* ActivityListItem.swift in Sources */,
-				862133132753E3EA002BD765 /* lil_wallet.xcdatamodeld in Sources */,
+				862133132753E3EA002BD765 /* ElectroLite.xcdatamodeld in Sources */,
 				8621332E2753E4BD002BD765 /* ActivityDetailView.swift in Sources */,
 				862133222753E474002BD765 /* CryptoListItem.swift in Sources */,
 				862133262753E485002BD765 /* ObjectGridItem.swift in Sources */,
@@ -402,6 +406,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "ElectroLite—Wallet for Crypto and Energy";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -435,6 +440,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "ElectroLite—Wallet for Crypto and Energy";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -500,13 +506,13 @@
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
-		862133112753E3EA002BD765 /* lil_wallet.xcdatamodeld */ = {
+		862133112753E3EA002BD765 /* ElectroLite.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				862133122753E3EA002BD765 /* lil_wallet.xcdatamodel */,
+				862133122753E3EA002BD765 /* ElectroLite.xcdatamodel */,
 			);
-			currentVersion = 862133122753E3EA002BD765 /* lil_wallet.xcdatamodel */;
-			path = lil_wallet.xcdatamodeld;
+			currentVersion = 862133122753E3EA002BD765 /* ElectroLite.xcdatamodel */;
+			path = ElectroLite.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

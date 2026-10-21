@@ -1,6 +1,6 @@
 //
-//  lil_walletApp.swift
-//  lil wallet
+//  electroliteApp.swift
+//  ElectroLite
 //
 //  Created by Jordan Singer on 11/28/21.
 //
@@ -9,9 +9,9 @@ import SwiftUI
 import CoreData
 
 @main
-struct lil_walletApp: App {
-    var appearance = Appearance()
-    var wallet = Wallet()
+struct ElectroLiteApp: App {
+    @StateObject private var appearance = Appearance()
+    @StateObject private var wallet = Wallet()
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {

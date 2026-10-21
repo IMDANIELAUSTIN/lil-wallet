@@ -1,20 +1,14 @@
-# lil wallet
+# ElectroLite
 
-welcome to lil wallet. it's an open-source Ethereum wallet built with SwiftUI
+**ElectroLite — Wallet for Crypto and Energy**
 
-there are two main views - coins and objects. coins are your tokens like ETH, etc. objects are your NFTs
+ElectroLite is an Ethereum & digital asset wallet built with SwiftUI and Swift 6 for iOS 17.0 through iOS 27.
 
-this is an early version. lots of stuff might be broken, including sometimes slow loading times.
+There are two main views:
+- **Coins**: Your tokens (ETH, USDC, ENS, etc.) and portfolio balance
+- **Objects**: Your NFTs and on-chain digital objects
 
-i'm sharing the first version, and hoping the community can take it from here!
-
-### todos
-- [ ] better data handling (needs lots of optionals cleanup)
-- [ ] speed improvements (not great rn)
-- [ ] data caching (don't make fresh requests every time)
-- [ ] support more NFT types (videos, etc)
-- [ ] sorting coins list?
-
-### data                       
-- [Zerion](https://docs.zerion.io) (portfolio, transactions, tokens)
-- [OpenSea](https://docs.opensea.io) (NFTs)
+### Data & Integrations
+- [Zerion](https://docs.zerion.io) & Ethereum JSON-RPC / CoinGecko (portfolio, transactions, tokens)
+- [OpenSea](https://docs.opensea.io) (NFTs & digital objects)
+- [ENS](https://ens.domains) (Ethereum Name Service resolution)

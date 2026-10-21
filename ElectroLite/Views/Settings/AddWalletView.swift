@@ -1,6 +1,6 @@
 //
 //  AddWalletView.swift
-//  lil wallet
+//  ElectroLite
 //
 //  Created by Jordan Singer on 11/28/21.
 //
@@ -122,42 +122,32 @@ struct AddWalletView: View {
         self.loading = true
         
         if let known = Self.wellKnownENS[ensName.lowercased()] {
-            DispatchQueue.main.async {
-                self.loading = false
-                self.addWallet(address: known)
-            }
+            self.loading = false
+            self.addWallet(address: known)
             return
         }
         
         let encodedName = ensName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ensName
         guard let url = URL(string: "https://api.ensdata.net/\(encodedName)") else {
-            DispatchQueue.main.async {
-                self.loading = false
-                self.showAlert = true
-            }
+            self.loading = false
+            self.showAlert = true
             return
         }
                 
         var request = URLRequest(url: url)
         request.timeoutInterval = 5
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data,
+        Task { @MainActor in
+            if let (data, _) = try? await URLSession.shared.data(for: request),
                let decodedResponse = try? JSONDecoder().decode(ReverseENSLookupResponse.self, from: data),
                !decodedResponse.address.isEmpty {
-                DispatchQueue.main.async {
-                    self.loading = false
-                    addWallet(address: decodedResponse.address)
-                }
-                return
-            }
-            
-            DispatchQueue.main.async {
+                self.loading = false
+                self.addWallet(address: decodedResponse.address)
+            } else {
                 self.loading = false
                 self.showAlert = true
             }
-            print("failed: \(error?.localizedDescription ?? "Unknown error")")
-        }.resume()
+        }
     }
 }
 

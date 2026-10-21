@@ -1,6 +1,6 @@
 //
 //  ObjectDetailView.swift
-//  lil wallet
+//  ElectroLite
 //
 //  Created by Jordan Singer on 11/28/21.
 //
@@ -119,18 +119,15 @@ struct WebView: UIViewRepresentable {
         }
         
         guard let url = URL(string: loadURL) else { return }
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data, let contents = String(data: data, encoding: .utf8) else {
-                DispatchQueue.main.async {
-                    uiView.load(URLRequest(url: url))
-                }
-                return
-            }
-            let html = contents + "<style>html, body { width: 100%; height: 100%; margin: 0; padding: 0 }</style><meta name=\"viewport\" content=\"width=device-width, shrink-to-fit=YES\">"
-            DispatchQueue.main.async {
+        Task { @MainActor in
+            if let (data, _) = try? await URLSession.shared.data(from: url),
+               let contents = String(data: data, encoding: .utf8) {
+                let html = contents + "<style>html, body { width: 100%; height: 100%; margin: 0; padding: 0 }</style><meta name=\"viewport\" content=\"width=device-width, shrink-to-fit=YES\">"
                 uiView.loadHTMLString(html, baseURL: url)
+            } else {
+                uiView.load(URLRequest(url: url))
             }
-        }.resume()
+        }
     }
 }
 

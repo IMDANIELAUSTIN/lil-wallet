@@ -1,19 +1,19 @@
 //
 //  Persistence.swift
-//  lil wallet
+//  ElectroLite
 //
 //  Created by Jordan Singer on 11/28/21.
 //
 
 import CoreData
 
-struct PersistenceController {
+struct PersistenceController: Sendable {
     static let shared = PersistenceController()
 
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "lil_wallet")
+        container = NSPersistentContainer(name: "ElectroLite")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
