@@ -153,6 +153,7 @@ struct ActivityDetailView: View {
         }
         .navigationTitle(transaction.title())
         .navigationBarTitleDisplayMode(.inline)
+        .fontDesign(appFont)
     }
 }
 

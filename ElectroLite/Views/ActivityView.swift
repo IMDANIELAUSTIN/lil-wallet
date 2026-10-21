@@ -56,6 +56,7 @@ struct ActivityView: View {
             }
         }
         .tint(appearance.getAppColor())
+        .fontDesign(appearance.getAppFont())
     }
 }
 

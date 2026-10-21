@@ -11,7 +11,11 @@ import Combine
 @MainActor
 class Appearance: ObservableObject {
     @AppStorage("appColor") private var appColor = AppColor.monochrome
-    @AppStorage("appFont") private var appFont = AppFont.regular
+    @AppStorage("appFont") private var appFont = AppFont.rounded
+    
+    init() {
+        updateNavBarTypography()
+    }
     
     func getAppColor() -> Color {
         appColor.color
@@ -19,6 +23,39 @@ class Appearance: ObservableObject {
     
     func getAppFont() -> Font.Design {
         appFont.font
+    }
+    
+    func updateNavBarTypography() {
+        let titleFont = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        let largeTitleFont = UIFont.systemFont(ofSize: 34, weight: .bold)
+        
+        let descriptor = titleFont.fontDescriptor.withDesign(getUIFontDesign()) ?? titleFont.fontDescriptor
+        let largeDescriptor = largeTitleFont.fontDescriptor.withDesign(getUIFontDesign()) ?? largeTitleFont.fontDescriptor
+        
+        let roundedTitleFont = UIFont(descriptor: descriptor, size: 17)
+        let roundedLargeTitleFont = UIFont(descriptor: largeDescriptor, size: 34)
+        
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithDefaultBackground()
+        navBarAppearance.titleTextAttributes = [.font: roundedTitleFont]
+        navBarAppearance.largeTitleTextAttributes = [.font: roundedLargeTitleFont]
+        
+        UINavigationBar.appearance().standardAppearance = navBarAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
+        UINavigationBar.appearance().compactAppearance = navBarAppearance
+    }
+    
+    private func getUIFontDesign() -> UIFontDescriptor.SystemDesign {
+        switch appFont {
+        case .regular:
+            return .default
+        case .rounded:
+            return .rounded
+        case .monospaced:
+            return .monospaced
+        case .serif:
+            return .serif
+        }
     }
 }
 

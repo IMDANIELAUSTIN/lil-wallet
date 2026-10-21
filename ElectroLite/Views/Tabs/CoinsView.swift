@@ -39,7 +39,7 @@ struct CoinsView: View {
                             .font(.system(.body, design: appearance.getAppFont()))
                         Button(action: { showAddWalletView = true }, label: {
                             Text("Add wallet")
-                                .font(.headline)
+                                .font(.system(.headline, design: appearance.getAppFont()))
                         })
                         .buttonStyle(.bordered)
                         .sheet(isPresented: $showAddWalletView) {

@@ -24,7 +24,7 @@ struct ContentView: View {
                 VStack {
                     Spacer()
                     Text(Image(systemName: "square.on.circle"))
-                        .font(.system(size: 56, weight: .medium))
+                        .font(.system(size: 56, weight: .medium, design: .rounded))
                         .foregroundStyle(appearance.getAppColor())
                     Spacer()
                 }
@@ -55,7 +55,11 @@ struct ContentView: View {
                 .background(TabBarConfigurator(activeTab: activeTab))
             }
         }
+        .fontDesign(appearance.getAppFont())
         .animation(.easeInOut(duration: 0.16), value: showLaunchScreen())
+        .onAppear {
+            appearance.updateNavBarTypography()
+        }
         .onReceive(timer) { _ in
             if self.timeRemaining > 0 {
                 self.timeRemaining -= 1

@@ -61,7 +61,7 @@ struct AddWalletView: View {
                         ProgressView()
                     } else {
                         Text("Save")
-                            .font(.headline)
+                            .font(.system(.headline, design: appearance.getAppFont()))
                     }
                 })
                 .disabled(!isValid() || self.loading)
@@ -72,6 +72,7 @@ struct AddWalletView: View {
         })
         .navigationTitle("Add Wallet")
         .navigationBarTitleDisplayMode(.inline)
+        .fontDesign(appearance.getAppFont())
         .onAppear(perform: { autofocus() })
     }
     

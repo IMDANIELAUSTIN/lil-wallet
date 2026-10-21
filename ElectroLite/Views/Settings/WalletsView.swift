@@ -67,11 +67,12 @@ struct WalletsView: View {
                         .environment(\.managedObjectContext, viewContext)
                 } label: {
                     Text("Add")
-                        .font(.headline)
+                        .font(.system(.headline, design: appFont))
                 }
             }
         }
         .navigationTitle("Wallets")
+        .fontDesign(appFont)
     }
     
     func setCurrentWalletAddress(address: String) {

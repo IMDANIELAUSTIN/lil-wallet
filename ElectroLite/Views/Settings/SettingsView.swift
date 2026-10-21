@@ -17,7 +17,7 @@ struct SettingsView: View {
     @EnvironmentObject var appearance: Appearance
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("appColor") private var appColor = AppColor.monochrome
-    @AppStorage("appFont") private var appFont = AppFont.regular
+    @AppStorage("appFont") private var appFont = AppFont.rounded
     
     var body: some View {
         let appFont = appearance.getAppFont()
@@ -114,6 +114,10 @@ struct SettingsView: View {
             }
         }
         .tint(appearance.getAppColor())
+        .fontDesign(appFont)
+        .onChange(of: appFont) { _ in
+            appearance.updateNavBarTypography()
+        }
     }
 }
 

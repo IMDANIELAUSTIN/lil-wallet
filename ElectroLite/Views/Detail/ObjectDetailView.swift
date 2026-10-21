@@ -88,6 +88,7 @@ struct ObjectDetailView: View {
         .listStyle(.inset)
         .navigationTitle(object.name ?? "Untitled")
         .navigationBarTitleDisplayMode(.inline)
+        .fontDesign(appFont)
     }
 }
 

@@ -88,6 +88,7 @@ struct CryptoDetailView: View {
         }
         .navigationTitle(token.name)
         .navigationBarTitleDisplayMode(.inline)
+        .fontDesign(appFont)
     }
 }
 
