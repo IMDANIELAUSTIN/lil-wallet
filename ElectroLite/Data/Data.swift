@@ -53,6 +53,8 @@ class Wallet: ObservableObject {
     @Published var loadingTokens = true
     @Published var loadingObjects = true
     @Published var loadingTransactions = true
+    @Published var transactionCategories: [String: String] = (UserDefaults.standard.dictionary(forKey: "transactionCategories") as? [String: String]) ?? [:]
+    @Published var transactionMerchants: [String: String] = (UserDefaults.standard.dictionary(forKey: "transactionMerchants") as? [String: String]) ?? [:]
     
     private var fallbackTask: Task<Void, Never>?
     
@@ -74,6 +76,37 @@ class Wallet: ObservableObject {
     func formatAddress(address: String) -> String {
         guard address.count > 10 else { return address }
         return address.prefix(6) + "..." + address.suffix(4)
+    }
+    
+    func category(for transaction: Transaction) -> TransactionCategory? {
+        guard let raw = transactionCategories[transaction.id] else { return nil }
+        return TransactionCategory(rawValue: raw)
+    }
+    
+    func setCategory(_ category: TransactionCategory?, for transaction: Transaction) {
+        if let category {
+            transactionCategories[transaction.id] = category.rawValue
+        } else {
+            transactionCategories.removeValue(forKey: transaction.id)
+        }
+        UserDefaults.standard.set(transactionCategories, forKey: "transactionCategories")
+    }
+    
+    func merchantName(for transaction: Transaction) -> String {
+        if let custom = transactionMerchants[transaction.id], !custom.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return custom
+        }
+        return transaction.merchantName ?? "Name of Business"
+    }
+    
+    func setMerchantName(_ name: String, for transaction: Transaction) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            transactionMerchants.removeValue(forKey: transaction.id)
+        } else {
+            transactionMerchants[transaction.id] = trimmed
+        }
+        UserDefaults.standard.set(transactionMerchants, forKey: "transactionMerchants")
     }
     
     func reload(reset: Bool, refresh: Bool) {
@@ -425,7 +458,7 @@ class Wallet: ObservableObject {
             self.loadingPortfolio = false
         }
         
-        if self.loadingTransactions {
+            if self.loadingTransactions {
             let now = Int(Date().timeIntervalSince1970)
             self.transactions = [
                 Transaction(
@@ -440,7 +473,9 @@ class Wallet: ObservableObject {
                     block_number: 21045120,
                     address_from: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
                     address_to: self.currentWalletAddress,
-                    fee: Fee(value: 0.00042 * oneETHinWEI, price: priceUSD)
+                    fee: Fee(value: 0.00042 * oneETHinWEI, price: priceUSD),
+                    network: "Ethereum",
+                    merchantName: "Name of Business"
                 ),
                 Transaction(
                     id: "tx-2",
@@ -454,7 +489,9 @@ class Wallet: ObservableObject {
                     block_number: 21031890,
                     address_from: self.currentWalletAddress,
                     address_to: "0x1db3439a222c519ab44bb1144fc28167b4fa6ee6",
-                    fee: Fee(value: 0.00031 * oneETHinWEI, price: priceUSD)
+                    fee: Fee(value: 0.00031 * oneETHinWEI, price: priceUSD),
+                    network: "Base",
+                    merchantName: "Name of Business"
                 )
             ]
             self.loadingTransactions = false
@@ -712,6 +749,166 @@ struct Fee: Sendable {
     }
 }
 
+enum TransactionCategory: String, CaseIterable, Identifiable, Codable, Sendable {
+    case foodAndDrinks = "Food & Drinks"
+    case entertainment = "Entertainment"
+    case shopping = "Shopping"
+    case travel = "Travel"
+    case health = "Health"
+    case transportation = "Transportation"
+    case services = "Services"
+    
+    var id: String { rawValue }
+    
+    var symbolName: String {
+        switch self {
+        case .foodAndDrinks: return "fork.knife"
+        case .entertainment: return "star.fill"
+        case .shopping: return "bag.fill"
+        case .travel: return "airplane"
+        case .health: return "heart.fill"
+        case .transportation: return "car.fill"
+        case .services: return "storefront.fill"
+        }
+    }
+    
+    var uiColor: UIColor {
+        switch self {
+        case .foodAndDrinks:
+            return UIColor(red: 0.97, green: 0.56, blue: 0.23, alpha: 1.0)
+        case .entertainment:
+            return UIColor(red: 0.95, green: 0.39, blue: 0.79, alpha: 1.0)
+        case .shopping:
+            return UIColor(red: 0.96, green: 0.74, blue: 0.15, alpha: 1.0)
+        case .travel:
+            return UIColor(red: 0.13, green: 0.79, blue: 0.20, alpha: 1.0)
+        case .health:
+            return UIColor(red: 0.99, green: 0.34, blue: 0.32, alpha: 1.0)
+        case .transportation:
+            return UIColor(red: 0.17, green: 0.56, blue: 1.00, alpha: 1.0)
+        case .services:
+            return UIColor(red: 0.59, green: 0.45, blue: 1.00, alpha: 1.0)
+        }
+    }
+    
+    @MainActor
+    private static var cachedMenuIcons: [TransactionCategory: UIImage] = [:]
+    
+    @MainActor
+    var menuIcon: UIImage {
+        if let cached = Self.cachedMenuIcons[self] {
+            return cached
+        }
+        let rendered = badgeIcon(size: 28)
+        Self.cachedMenuIcons[self] = rendered
+        return rendered
+    }
+    
+    @MainActor
+    func badgeIcon(size: CGFloat) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 3.0
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size), format: format)
+        let img = renderer.image { context in
+            let rect = CGRect(origin: .zero, size: CGSize(width: size, height: size))
+            let cornerRadius = size * 0.25
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius)
+            uiColor.setFill()
+            path.fill()
+            
+            let pointSize = size * 0.46
+            let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .semibold)
+            if self == .shopping {
+                // Draw the two-bag shopping icon (taller bag behind on left, wider bag in front on right)
+                let cgContext = context.cgContext
+                cgContext.saveGState()
+                UIColor.white.setFill()
+                UIColor.white.setStroke()
+                
+                // Back bag (left, taller)
+                let backRect = CGRect(x: size * 0.23, y: size * 0.34, width: size * 0.32, height: size * 0.38)
+                let backBag = UIBezierPath(roundedRect: backRect, cornerRadius: size * 0.04)
+                backBag.fill()
+                
+                // Back bag handle
+                let backHandle = UIBezierPath(
+                    arcCenter: CGPoint(x: backRect.midX, y: backRect.minY),
+                    radius: size * 0.075,
+                    startAngle: .pi,
+                    endAngle: 0,
+                    clockwise: true
+                )
+                backHandle.lineWidth = max(1.4, size * 0.055)
+                backHandle.stroke()
+                
+                // Cutout around front bag for separation
+                let frontRect = CGRect(x: size * 0.41, y: size * 0.44, width: size * 0.36, height: size * 0.29)
+                let cutoutRect = frontRect.insetBy(dx: -size * 0.035, dy: -size * 0.035)
+                let cutoutBag = UIBezierPath(roundedRect: cutoutRect, cornerRadius: size * 0.05)
+                uiColor.setFill()
+                cutoutBag.fill()
+                
+                // Front bag (right, wider)
+                UIColor.white.setFill()
+                let frontBag = UIBezierPath(roundedRect: frontRect, cornerRadius: size * 0.04)
+                frontBag.fill()
+                
+                // Horizontal accent line across front bag
+                uiColor.setStroke()
+                let flapLine = UIBezierPath()
+                flapLine.lineWidth = max(1.1, size * 0.04)
+                flapLine.move(to: CGPoint(x: frontRect.minX + size * 0.03, y: frontRect.minY + frontRect.height * 0.42))
+                flapLine.addLine(to: CGPoint(x: frontRect.maxX - size * 0.03, y: frontRect.minY + frontRect.height * 0.42))
+                flapLine.stroke()
+                
+                // Front bag handle
+                UIColor.white.setStroke()
+                let frontHandle = UIBezierPath(
+                    arcCenter: CGPoint(x: frontRect.midX, y: frontRect.minY),
+                    radius: size * 0.065,
+                    startAngle: .pi,
+                    endAngle: 0,
+                    clockwise: true
+                )
+                frontHandle.lineWidth = max(1.3, size * 0.05)
+                frontHandle.stroke()
+                cgContext.restoreGState()
+            } else if let symbol = UIImage(systemName: symbolName, withConfiguration: config)?.withTintColor(.white, renderingMode: .alwaysOriginal) {
+                let cgContext = context.cgContext
+                cgContext.saveGState()
+                cgContext.translateBy(x: size / 2, y: size / 2)
+                if self == .travel {
+                    cgContext.rotate(by: -.pi / 4)
+                }
+                let symSize = symbol.size
+                let drawRect = CGRect(x: -symSize.width / 2, y: -symSize.height / 2, width: symSize.width, height: symSize.height)
+                symbol.draw(in: drawRect)
+                
+                if self == .health {
+                    // Draw ECG heartbeat line across the white heart
+                    uiColor.setStroke()
+                    let ecg = UIBezierPath()
+                    ecg.lineWidth = max(1.3, size * 0.05)
+                    ecg.lineCapStyle = .round
+                    ecg.lineJoinStyle = .round
+                    let w = symSize.width * 0.38
+                    let h = symSize.height * 0.22
+                    ecg.move(to: CGPoint(x: -w, y: 0))
+                    ecg.addLine(to: CGPoint(x: -w * 0.35, y: 0))
+                    ecg.addLine(to: CGPoint(x: -w * 0.15, y: -h))
+                    ecg.addLine(to: CGPoint(x: w * 0.12, y: h * 0.85))
+                    ecg.addLine(to: CGPoint(x: w * 0.32, y: 0))
+                    ecg.addLine(to: CGPoint(x: w, y: 0))
+                    ecg.stroke()
+                }
+                cgContext.restoreGState()
+            }
+        }
+        return img.withRenderingMode(.alwaysOriginal)
+    }
+}
+
 struct Transaction: Identifiable, Sendable {
     let id: String
     let token: Token?
@@ -725,6 +922,8 @@ struct Transaction: Identifiable, Sendable {
     let address_from: String?
     let address_to: String?
     let fee: Fee?
+    var network: String = "Base"
+    var merchantName: String? = "Name of Business"
     
     func transactionQuantity() -> Double {
         return (self.value ?? 0) / oneETHinWEI
@@ -735,6 +934,10 @@ struct Transaction: Identifiable, Sendable {
             return 0
         }
         return price * self.transactionQuantity()
+    }
+    
+    func fullTotalValue() -> Double {
+        return transactionValue() + (fee?.feePrice() ?? 0)
     }
     
     func title() -> String {
