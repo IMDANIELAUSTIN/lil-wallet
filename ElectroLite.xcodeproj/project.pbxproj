@@ -22,6 +22,7 @@
 		862133262753E485002BD765 /* ObjectGridItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133252753E485002BD765 /* ObjectGridItem.swift */; };
 		862133282753E48F002BD765 /* CoinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133272753E48F002BD765 /* CoinsView.swift */; };
 		8621332A2753E4A1002BD765 /* ObjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133292753E4A0002BD765 /* ObjectsView.swift */; };
+		862133362753E4E0002BD765 /* ScanQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133352753E4E0002BD765 /* ScanQRView.swift */; };
 		8621332C2753E4B5002BD765 /* CryptoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621332B2753E4B5002BD765 /* CryptoDetailView.swift */; };
 		8621332E2753E4BD002BD765 /* ActivityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621332D2753E4BD002BD765 /* ActivityDetailView.swift */; };
 		862133302753E4C3002BD765 /* ObjectDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621332F2753E4C3002BD765 /* ObjectDetailView.swift */; };
@@ -49,6 +50,7 @@
 		862133252753E485002BD765 /* ObjectGridItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectGridItem.swift; sourceTree = "<group>"; };
 		862133272753E48F002BD765 /* CoinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinsView.swift; sourceTree = "<group>"; };
 		862133292753E4A0002BD765 /* ObjectsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectsView.swift; sourceTree = "<group>"; };
+		862133352753E4E0002BD765 /* ScanQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQRView.swift; sourceTree = "<group>"; };
 		8621332B2753E4B5002BD765 /* CryptoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoDetailView.swift; sourceTree = "<group>"; };
 		8621332D2753E4BD002BD765 /* ActivityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetailView.swift; sourceTree = "<group>"; };
 		8621332F2753E4C3002BD765 /* ObjectDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetailView.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 			children = (
 				862133272753E48F002BD765 /* CoinsView.swift */,
 				862133292753E4A0002BD765 /* ObjectsView.swift */,
+				862133352753E4E0002BD765 /* ScanQRView.swift */,
 			);
 			path = Tabs;
 			sourceTree = "<group>";
@@ -266,6 +269,7 @@
 				861F66172753F0F5006E6295 /* WalletsView.swift in Sources */,
 				86F4D61927694FC3005094BE /* Data.swift in Sources */,
 				862133282753E48F002BD765 /* CoinsView.swift in Sources */,
+				862133362753E4E0002BD765 /* ScanQRView.swift in Sources */,
 				862133302753E4C3002BD765 /* ObjectDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
