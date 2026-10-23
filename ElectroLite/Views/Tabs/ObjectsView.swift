@@ -23,6 +23,9 @@ struct ObjectsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
+                
                 if wallet.loadingObjects {
                     VStack {
                         Spacer()
@@ -73,12 +76,13 @@ struct ObjectsView: View {
                     }
                 }
             }
+            .background(Color(uiColor: .systemGroupedBackground))
             .listStyle(.plain)
             .navigationTitle("Objects")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "clock").font(.headline) })
+                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "magnifyingglass").font(.headline) })
                         .sheet(isPresented: $showActivityView) {
                             ActivityView()
                                 .environmentObject(wallet)

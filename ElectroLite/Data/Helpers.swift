@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import CoreText
 
 @MainActor
 class Appearance: ObservableObject {
@@ -24,6 +25,25 @@ class Appearance: ObservableObject {
     
     func getAppFont() -> Font.Design {
         appFont.font
+    }
+    
+    func getBalanceFont(size: CGFloat = 34, weight: UIFont.Weight = .bold) -> Font {
+        let baseFont = UIFont.systemFont(ofSize: size, weight: weight)
+        let descriptor = baseFont.fontDescriptor.withDesign(getUIFontDesign()) ?? baseFont.fontDescriptor
+        
+        let featureSettings: [[UIFontDescriptor.FeatureKey: Any]] = [
+            [UIFontDescriptor.FeatureKey(rawValue: kCTFontOpenTypeFeatureTag as String): "cv09",
+             UIFontDescriptor.FeatureKey(rawValue: kCTFontOpenTypeFeatureValue as String): 1],
+            [UIFontDescriptor.FeatureKey(rawValue: kCTFontOpenTypeFeatureTag as String): "cv10",
+             UIFontDescriptor.FeatureKey(rawValue: kCTFontOpenTypeFeatureValue as String): 1]
+        ]
+        
+        let variantDescriptor = descriptor.addingAttributes([
+            .featureSettings: featureSettings
+        ])
+        
+        let uiFont = UIFont(descriptor: variantDescriptor, size: size)
+        return Font(uiFont)
     }
     
     func updateNavBarTypography() {

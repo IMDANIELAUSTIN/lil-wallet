@@ -20,17 +20,36 @@ struct CoinsView: View {
         animation: .default)
     private var wallets: FetchedResults<WalletAddress>
     
+    private var balanceHeader: some View {
+        HStack {
+            Spacer()
+            Text(wallet.formatCurrency(value: wallet.value))
+                .font(appearance.getBalanceFont(size: 34, weight: .bold))
+                .multilineTextAlignment(.center)
+            Spacer()
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
+                
                 if wallet.loadingTokens {
                     VStack {
+                        balanceHeader
+                            .padding(.top, 4)
+                            .padding(.bottom, 8)
                         Spacer()
                         ProgressView()
                         Spacer()
                     }
                 } else if wallets.count == 0 {
                     VStack {
+                        balanceHeader
+                            .padding(.top, 4)
+                            .padding(.bottom, 8)
                         Spacer()
                         Text("No wallets")
                             .foregroundStyle(.secondary)
@@ -50,6 +69,9 @@ struct CoinsView: View {
                     }
                 } else if wallet.tokens.count == 0 && !wallet.loadingTokens {
                     VStack {
+                        balanceHeader
+                            .padding(.top, 4)
+                            .padding(.bottom, 8)
                         Spacer()
                         Text("No crypto")
                             .foregroundStyle(.secondary)
@@ -58,21 +80,32 @@ struct CoinsView: View {
                     }
                 } else {
                     List {
+                        Section {
+                            balanceHeader
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                        }
+                        
                         ForEach(wallet.tokens) { token in
                             CryptoListItem(token: token)
                                 .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
                         }
                     }
                     .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.clear)
                     .refreshable {
                         self.wallet.reload(reset: false, refresh: true)
                     }
                 }
             }
-            .navigationTitle(wallet.formatCurrency(value: wallet.value))
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "clock").font(.headline) })
+                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "magnifyingglass").font(.headline) })
                         .sheet(isPresented: $showActivityView) {
                             ActivityView()
                                 .environmentObject(wallet)
