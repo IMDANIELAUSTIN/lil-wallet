@@ -32,7 +32,7 @@ struct ObjectGridItem: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .foregroundStyle(Color(.secondarySystemBackground))
+                            .foregroundStyle(Color(.secondarySystemGroupedBackground))
                             .aspectRatio(1, contentMode: .fill)
                     )
             }

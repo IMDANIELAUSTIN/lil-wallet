@@ -30,6 +30,13 @@ struct CoinsView: View {
         }
     }
     
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.system(.subheadline, design: appearance.getAppFont()).weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.leading, 4)
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -67,35 +74,71 @@ struct CoinsView: View {
                         }
                         Spacer()
                     }
-                } else if wallet.tokens.count == 0 && !wallet.loadingTokens {
-                    VStack {
-                        balanceHeader
-                            .padding(.top, 4)
-                            .padding(.bottom, 8)
-                        Spacer()
-                        Text("No crypto")
-                            .foregroundStyle(.secondary)
-                            .font(.system(.body, design: appearance.getAppFont()))
-                        Spacer()
-                    }
                 } else {
-                    List {
-                        Section {
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 24) {
                             balanceHeader
-                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
+                                .padding(.top, 8)
+                                .padding(.bottom, 4)
+                            
+                            // Portfolio Section
+                            VStack(alignment: .leading, spacing: 6) {
+                                sectionHeader("Portfolio")
+                                
+                                if wallet.tokens.isEmpty {
+                                    HStack {
+                                        Spacer()
+                                        Text("No crypto")
+                                            .foregroundStyle(.secondary)
+                                            .font(.system(.body, design: appearance.getAppFont()))
+                                            .padding(.vertical, 20)
+                                        Spacer()
+                                    }
+                                } else {
+                                    VStack(spacing: 2) {
+                                        ForEach(wallet.tokens) { token in
+                                            CryptoListItem(token: token)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            
+                            // Gallery Section
+                            VStack(alignment: .leading, spacing: 12) {
+                                sectionHeader("Gallery")
+                                
+                                if wallet.loadingObjects {
+                                    HStack {
+                                        Spacer()
+                                        ProgressView()
+                                            .padding(.vertical, 24)
+                                        Spacer()
+                                    }
+                                } else if wallet.objects.isEmpty {
+                                    HStack {
+                                        Spacer()
+                                        Text("No objects")
+                                            .foregroundStyle(.secondary)
+                                            .font(.system(.body, design: appearance.getAppFont()))
+                                            .padding(.vertical, 24)
+                                        Spacer()
+                                    }
+                                } else {
+                                    LazyVGrid(columns: [
+                                        GridItem(.flexible(minimum: 40), spacing: 12),
+                                        GridItem(.flexible(minimum: 40), spacing: 12)
+                                    ], spacing: 12) {
+                                        ForEach(wallet.objects) { object in
+                                            ObjectGridItem(object: object)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 16)
                         }
-                        
-                        ForEach(wallet.tokens) { token in
-                            CryptoListItem(token: token)
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
-                        }
+                        .padding(.bottom, 24)
                     }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.clear)
                     .refreshable {
                         self.wallet.reload(reset: false, refresh: true)
                     }

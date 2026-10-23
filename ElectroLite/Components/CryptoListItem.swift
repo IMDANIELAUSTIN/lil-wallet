@@ -24,6 +24,7 @@ struct CryptoListItem: View {
                         Text(token.name == "" ? "Untitled" : token.name)
                             .lineLimit(1)
                             .font(.system(.headline, design: appFont))
+                            .foregroundStyle(.primary)
                         
                         Spacer()
                         
@@ -36,9 +37,15 @@ struct CryptoListItem: View {
                         .font(.system(.body, design: appFont))
                         .foregroundStyle(.secondary)
                 }
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold, design: appFont))
+                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
             }
             .padding(.vertical, 10)
+            .contentShape(Rectangle())
         })
+        .buttonStyle(.plain)
     }
 }
 

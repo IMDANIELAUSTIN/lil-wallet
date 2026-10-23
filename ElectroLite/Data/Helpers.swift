@@ -153,17 +153,17 @@ struct ImageView: View {
                     .resizable()
                     .aspectRatio(1, contentMode: .fill)
             case .failure:
-                Color(.secondarySystemBackground)
+                Color(.secondarySystemGroupedBackground)
                     .overlay {
                         Image(systemName: "photo")
                             .foregroundStyle(.secondary)
                     }
                     .aspectRatio(1, contentMode: .fill)
             case .empty:
-                Color(.secondarySystemBackground)
+                Color(.secondarySystemGroupedBackground)
                     .aspectRatio(1, contentMode: .fill)
             @unknown default:
-                Color(.secondarySystemBackground)
+                Color(.secondarySystemGroupedBackground)
                     .aspectRatio(1, contentMode: .fill)
             }
         }
