@@ -10,6 +10,8 @@ import CoreData
 
 struct ContentView: View {
     @State var activeTab = 0
+    @State private var lastNonProminentTab = 0
+    @State private var showScanSheet = false
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
     @Environment(\.managedObjectContext) private var viewContext
@@ -39,10 +41,14 @@ struct ContentView: View {
                         }
                         
                         Tab(value: 1, role: .prominent) {
-                            ScanQRView()
-                                .environmentObject(wallet)
-                                .environmentObject(appearance)
-                                .environment(\.managedObjectContext, viewContext)
+                            if lastNonProminentTab == 2 {
+                                ObjectsView()
+                                    .environment(\.managedObjectContext, viewContext)
+                            } else {
+                                CoinsView()
+                                    .environmentObject(wallet)
+                                    .environment(\.managedObjectContext, viewContext)
+                            }
                         } label: {
                             Label("Scan", systemImage: "qrcode")
                                 .environment(\.symbolVariants, .none)
@@ -72,9 +78,8 @@ struct ContentView: View {
                             }
                             .tag(0)
                         
-                        ScanQRView()
+                        CoinsView()
                             .environmentObject(wallet)
-                            .environmentObject(appearance)
                             .environment(\.managedObjectContext, viewContext)
                             .tabItem {
                                 Image(systemName: "qrcode")
@@ -100,6 +105,24 @@ struct ContentView: View {
         }
         .fontDesign(appearance.getAppFont())
         .animation(.easeInOut(duration: 0.16), value: showLaunchScreen())
+        .onChange(of: activeTab) { oldValue, newValue in
+            if newValue == 1 {
+                activeTab = lastNonProminentTab
+                showScanSheet = true
+            } else {
+                lastNonProminentTab = newValue
+            }
+        }
+        .sheet(isPresented: $showScanSheet) {
+            ScanQRView()
+                .environmentObject(wallet)
+                .environmentObject(appearance)
+                .environment(\.managedObjectContext, viewContext)
+                .tint(appearance.getAppColor())
+                .fontDesign(appearance.getAppFont())
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+        }
         .onAppear {
             appearance.updateNavBarTypography()
         }

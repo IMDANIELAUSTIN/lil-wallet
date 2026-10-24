@@ -17,8 +17,6 @@ struct ScanQRView: View {
     @State private var selectedMode: ScanMode = .scan
     @State private var isTorchOn = false
     @State private var copiedAddress = false
-    @State private var showActivityView = false
-    @State private var showSettingsView = false
     
     enum ScanMode: String, CaseIterable, Identifiable {
         case scan = "Scan"
@@ -37,102 +35,75 @@ struct ScanQRView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color(uiColor: .systemGroupedBackground)
-                    .ignoresSafeArea()
-                
-                VStack(spacing: 28) {
-                    Picker("Mode", selection: $selectedMode) {
-                        ForEach(ScanMode.allCases) { mode in
-                            Text(mode.rawValue).tag(mode)
-                        }
+        ZStack {
+            Color(uiColor: .systemGroupedBackground)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                Picker("Mode", selection: $selectedMode) {
+                    ForEach(ScanMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
                     }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, 24)
-                    .padding(.top, 12)
-                    
-                    Spacer()
-                    
-                    if selectedMode == .scan {
-                        scanViewfinder
-                    } else {
-                        receiveQRCard
-                    }
-                    
-                    Spacer()
                 }
-            }
-            .navigationTitle(selectedMode == .scan ? "Scan QR" : "Receive")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "magnifyingglass").font(.headline) })
-                        .sheet(isPresented: $showActivityView) {
-                            ActivityView()
-                                .environmentObject(wallet)
-                                .environmentObject(appearance)
-                        }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                
+                Spacer(minLength: 0)
+                
+                if selectedMode == .scan {
+                    scanViewfinder
+                } else {
+                    receiveQRCard
                 }
                 
-                if #available(iOS 26.0, *) {
-                    ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showSettingsView.toggle() }, label: { Image(systemName: "gear").font(.headline) })
-                        .sheet(isPresented: $showSettingsView) {
-                            SettingsView(showSettingsView: $showSettingsView)
-                                .environmentObject(wallet)
-                                .environmentObject(appearance)
-                                .environment(\.managedObjectContext, viewContext)
-                        }
-                }
+                Spacer(minLength: 0)
             }
+            .padding(.bottom, 12)
         }
     }
     
     private var scanViewfinder: some View {
-        VStack(spacing: 28) {
+        VStack(spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
                     .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                    .frame(width: 260, height: 260)
+                    .frame(width: 176, height: 176)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .strokeBorder(appearance.getAppColor().opacity(0.35), style: StrokeStyle(lineWidth: 2.5, dash: [14, 10]))
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                            .strokeBorder(appearance.getAppColor().opacity(0.35), style: StrokeStyle(lineWidth: 2, dash: [12, 8]))
                     )
                 
-                VStack(spacing: 14) {
+                VStack(spacing: 10) {
                     Image(systemName: "qrcode.viewfinder")
-                        .font(.system(size: 72, weight: .regular, design: appearance.getAppFont()))
+                        .font(.system(size: 52, weight: .regular, design: appearance.getAppFont()))
                         .foregroundStyle(appearance.getAppColor())
                     
                     Text("Align QR code inside frame")
-                        .font(.system(.subheadline, design: appearance.getAppFont()))
+                        .font(.system(.caption, design: appearance.getAppFont()))
                         .foregroundStyle(.secondary)
                 }
             }
             
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 Text("Scan to Send or Connect")
-                    .font(.system(.title3, design: appearance.getAppFont()).weight(.semibold))
+                    .font(.system(.headline, design: appearance.getAppFont()).weight(.semibold))
                 
                 Text("Scan an Ethereum wallet address or WalletConnect QR code.")
-                    .font(.system(.subheadline, design: appearance.getAppFont()))
+                    .font(.system(.caption, design: appearance.getAppFont()))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, 32)
             }
             
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Button {
                     isTorchOn.toggle()
                 } label: {
                     Label(isTorchOn ? "Light On" : "Light", systemImage: isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
                         .font(.system(.subheadline, design: appearance.getAppFont()).weight(.medium))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
                 }
                 .buttonStyle(.bordered)
                 .clipShape(Capsule())
@@ -144,8 +115,8 @@ struct ScanQRView: View {
                 } label: {
                     Label("Paste Address", systemImage: "doc.on.clipboard")
                         .font(.system(.subheadline, design: appearance.getAppFont()).weight(.medium))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
                 }
                 .buttonStyle(.bordered)
                 .clipShape(Capsule())
@@ -154,28 +125,28 @@ struct ScanQRView: View {
     }
     
     private var receiveQRCard: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 16) {
+        VStack(spacing: 14) {
+            VStack(spacing: 10) {
                 if let qrImage = generateQRCode(from: displayAddress) {
                     Image(uiImage: qrImage)
                         .interpolation(.none)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 210, height: 210)
-                        .padding(20)
+                        .frame(width: 140, height: 140)
+                        .padding(14)
                         .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 }
                 
                 Text(shortenedAddress)
-                    .font(.system(.headline, design: .monospaced))
+                    .font(.system(.subheadline, design: .monospaced).weight(.medium))
                     .foregroundStyle(.primary)
             }
-            .padding(24)
+            .padding(16)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
             
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Button {
                     UIPasteboard.general.string = displayAddress
                     copiedAddress = true
@@ -186,8 +157,8 @@ struct ScanQRView: View {
                 } label: {
                     Label(copiedAddress ? "Copied" : "Copy Address", systemImage: copiedAddress ? "checkmark.circle.fill" : "doc.on.doc")
                         .font(.system(.subheadline, design: appearance.getAppFont()).weight(.medium))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
                 }
                 .buttonStyle(.bordered)
                 .clipShape(Capsule())
@@ -195,8 +166,8 @@ struct ScanQRView: View {
                 ShareLink(item: displayAddress) {
                     Label("Share", systemImage: "square.and.arrow.up")
                         .font(.system(.subheadline, design: appearance.getAppFont()).weight(.medium))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
                 }
                 .buttonStyle(.bordered)
                 .clipShape(Capsule())
