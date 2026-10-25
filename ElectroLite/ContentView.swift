@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
-    @State var activeTab = 0
+    @State var activeTab = CommandLine.arguments.contains("-openChatTab") ? 2 : 0
     @State private var lastNonProminentTab = 0
     @State private var showScanSheet = false
     @EnvironmentObject var wallet: Wallet
@@ -42,7 +42,9 @@ struct ContentView: View {
                         
                         Tab(value: 1, role: .prominent) {
                             if lastNonProminentTab == 2 {
-                                ObjectsView()
+                                ChatView(activeTab: $activeTab)
+                                    .environmentObject(wallet)
+                                    .environmentObject(appearance)
                                     .environment(\.managedObjectContext, viewContext)
                             } else {
                                 CoinsView()
@@ -55,10 +57,12 @@ struct ContentView: View {
                         }
                         
                         Tab(value: 2) {
-                            ObjectsView()
+                            ChatView(activeTab: $activeTab)
+                                .environmentObject(wallet)
+                                .environmentObject(appearance)
                                 .environment(\.managedObjectContext, viewContext)
                         } label: {
-                            Label("Objects", systemImage: activeTab == 2 ? "shippingbox.fill" : "shippingbox")
+                            Label("Chat", systemImage: activeTab == 2 ? "message.fill" : "message")
                                 .environment(\.symbolVariants, activeTab == 2 ? .fill : .none)
                         }
                     }
@@ -88,13 +92,15 @@ struct ContentView: View {
                             }
                             .tag(1)
                         
-                        ObjectsView()
+                        ChatView(activeTab: $activeTab)
+                            .environmentObject(wallet)
+                            .environmentObject(appearance)
                             .environment(\.managedObjectContext, viewContext)
                             .tabItem {
-                                Image(systemName: activeTab == 2 ? "shippingbox.fill" : "shippingbox")
+                                Image(systemName: activeTab == 2 ? "message.fill" : "message")
                                     .font(.system(size: 20, design: .rounded))
                                     .environment(\.symbolVariants, activeTab == 2 ? .fill : .none)
-                                Text("Objects")
+                                Text("Chat")
                             }
                             .tag(2)
                     }
@@ -159,6 +165,8 @@ private struct TabBarConfigurator: UIViewRepresentable {
     private static let houseImage = UIImage(systemName: "house", withConfiguration: symbolConfig)
     private static let houseFillImage = UIImage(systemName: "house.fill", withConfiguration: symbolConfig)
     private static let qrCodeImage = UIImage(systemName: "qrcode", withConfiguration: symbolConfig)
+    private static let messageImage = UIImage(systemName: "message", withConfiguration: symbolConfig)
+    private static let messageFillImage = UIImage(systemName: "message.fill", withConfiguration: symbolConfig)
     private static let shippingboxImage = UIImage(systemName: "shippingbox", withConfiguration: symbolConfig)
     private static let shippingboxFillImage = UIImage(systemName: "shippingbox.fill", withConfiguration: symbolConfig)
     
@@ -211,6 +219,11 @@ private struct TabBarConfigurator: UIViewRepresentable {
                     if #available(iOS 26.1, *) {
                         tab.selectedImage = Self.houseFillImage
                     }
+                case "Chat":
+                    tab.image = Self.messageImage
+                    if #available(iOS 26.1, *) {
+                        tab.selectedImage = Self.messageFillImage
+                    }
                 case "Objects":
                     tab.image = Self.shippingboxImage
                     if #available(iOS 26.1, *) {
@@ -233,6 +246,9 @@ private struct TabBarConfigurator: UIViewRepresentable {
                 case "Home":
                     item.image = Self.houseImage
                     item.selectedImage = Self.houseFillImage
+                case "Chat":
+                    item.image = Self.messageImage
+                    item.selectedImage = Self.messageFillImage
                 case "Objects":
                     item.image = Self.shippingboxImage
                     item.selectedImage = Self.shippingboxFillImage
@@ -249,8 +265,9 @@ private struct TabBarConfigurator: UIViewRepresentable {
            let vp = tabBar.value(forKey: "_visualProvider") as AnyObject? {
             let sel = Selector(("setMinimized:"))
             if vp.responds(to: sel), let imp = vp.method(for: sel) {
+                let shouldMinimize = !CommandLine.arguments.contains("-expandTabBar")
                 typealias SetMinFn = @convention(c) (AnyObject, Selector, Bool) -> Void
-                unsafeBitCast(imp, to: SetMinFn.self)(vp, sel, true)
+                unsafeBitCast(imp, to: SetMinFn.self)(vp, sel, shouldMinimize)
                 coordinator.didMinimizeInitially = true
             }
         }

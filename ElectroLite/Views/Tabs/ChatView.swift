@@ -1,0 +1,280 @@
+//
+//  ChatView.swift
+//  ElectroLite
+//
+//  Created by Daniel Lee Austin on 10/24/26.
+//
+
+import SwiftUI
+import CoreData
+
+struct PinnedConversation: Identifiable, Hashable {
+    let id = UUID()
+    var name: String
+    
+    static let sampleFavorites: [PinnedConversation] = (0..<9).map { _ in
+        PinnedConversation(name: "Name")
+    }
+}
+
+struct ChatView: View {
+    @Binding var activeTab: Int
+    @State private var showActivityView = false
+    @State private var showSettingsView = false
+    @State private var pinnedConversations: [PinnedConversation] = CommandLine.arguments.contains("-testFavorites") ? PinnedConversation.sampleFavorites : []
+    
+    @EnvironmentObject var wallet: Wallet
+    @EnvironmentObject var appearance: Appearance
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    
+    // Counts for chat categories
+    @State private var allChatsCount = 0
+    @State private var knownSendersCount = 0
+    @State private var unknownSendersCount = 0
+    @State private var unreadChatsCount = 0
+    @State private var archivedCount = 0
+    
+    private let columns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        // Favorites Section
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text("Favorites")
+                                .font(.system(.subheadline, design: appearance.getAppFont()).weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 20)
+                            
+                            if !pinnedConversations.isEmpty {
+                                LazyVGrid(columns: columns, spacing: 18) {
+                                    ForEach(pinnedConversations.prefix(9)) { conversation in
+                                        Button {
+                                            // Handle conversation selection
+                                        } label: {
+                                            VStack(spacing: 8) {
+                                                CheckeredAvatarPlaceholder(size: 74)
+                                                
+                                                Text(conversation.name)
+                                                    .font(.system(.subheadline, design: appearance.getAppFont()))
+                                                    .foregroundStyle(Color(uiColor: .secondaryLabel))
+                                                    .lineLimit(1)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                        }
+                        .padding(.top, 4)
+                        
+                        // Chats Section
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Chats")
+                                .font(.system(.subheadline, design: appearance.getAppFont()).weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 20)
+                            
+                            // Card 1: Main Categories
+                            VStack(spacing: 0) {
+                                chatCategoryRow(
+                                    title: "All Chats",
+                                    icon: "bubble.left.fill",
+                                    iconColor: .blue,
+                                    count: allChatsCount
+                                )
+                                
+                                rowDivider
+                                
+                                chatCategoryRow(
+                                    title: "Known Senders",
+                                    icon: "person.crop.circle.fill",
+                                    iconColor: .blue,
+                                    count: knownSendersCount
+                                )
+                                
+                                rowDivider
+                                
+                                chatCategoryRow(
+                                    title: "Unknown Senders",
+                                    icon: "person.crop.circle.badge.questionmark.fill",
+                                    iconColor: .blue,
+                                    count: unknownSendersCount
+                                )
+                                
+                                rowDivider
+                                
+                                chatCategoryRow(
+                                    title: "Unread Chats",
+                                    icon: "message.badge.filled.fill",
+                                    iconColor: .blue,
+                                    count: unreadChatsCount
+                                )
+                            }
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .padding(.horizontal, 16)
+                            
+                            // Card 2: Archived Messages
+                            VStack(spacing: 0) {
+                                chatCategoryRow(
+                                    title: "Archived Messages",
+                                    icon: "arrow.up.circle.fill",
+                                    iconColor: .red,
+                                    count: archivedCount
+                                )
+                            }
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .padding(.horizontal, 16)
+                            .padding(.top, 6)
+                        }
+                    }
+                    .padding(.bottom, 32)
+                }
+            }
+            .navigationTitle("Chat")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        activeTab = 0
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold, design: appearance.getAppFont()))
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showActivityView.toggle()
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.headline)
+                    }
+                    .sheet(isPresented: $showActivityView) {
+                        ActivityView()
+                            .environmentObject(wallet)
+                            .environmentObject(appearance)
+                    }
+                }
+                
+                if #available(iOS 26.0, *) {
+                    ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showSettingsView.toggle()
+                    } label: {
+                        Image(systemName: "gear")
+                            .font(.headline)
+                    }
+                    .sheet(isPresented: $showSettingsView) {
+                        SettingsView(showSettingsView: $showSettingsView)
+                            .environmentObject(wallet)
+                            .environmentObject(appearance)
+                            .environment(\.managedObjectContext, viewContext)
+                    }
+                }
+            }
+        }
+        .fontDesign(appearance.getAppFont())
+    }
+    
+    private var rowDivider: some View {
+        Divider()
+            .padding(.leading, 56)
+    }
+    
+    @ViewBuilder
+    private func chatCategoryRow(
+        title: String,
+        icon: String,
+        iconColor: Color,
+        count: Int
+    ) -> some View {
+        Button {
+            // Action for filter category
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 24))
+                    .foregroundStyle(iconColor)
+                    .frame(width: 30, height: 30)
+                
+                Text(title)
+                    .font(.system(.body, design: appearance.getAppFont()))
+                    .foregroundStyle(.primary)
+                
+                Spacer()
+                
+                Text("\(count)")
+                    .font(.system(.body, design: appearance.getAppFont()))
+                    .foregroundStyle(.secondary)
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold, design: appearance.getAppFont()))
+                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Avatar Placeholder
+struct CheckeredAvatarPlaceholder: View {
+    var size: CGFloat = 74
+    
+    var body: some View {
+        Canvas { context, canvasSize in
+            let tileSize: CGFloat = 7
+            let cols = Int(ceil(canvasSize.width / tileSize))
+            let rows = Int(ceil(canvasSize.height / tileSize))
+            
+            for r in 0..<rows {
+                for c in 0..<cols {
+                    let isEven = (r + c) % 2 == 0
+                    let color = isEven
+                        ? Color(uiColor: .systemGray5)
+                        : Color(uiColor: .systemGray4).opacity(0.7)
+                    let rect = CGRect(
+                        x: CGFloat(c) * tileSize,
+                        y: CGFloat(r) * tileSize,
+                        width: tileSize,
+                        height: tileSize
+                    )
+                    context.fill(Path(rect), with: .color(color))
+                }
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .overlay(
+            Circle()
+                .strokeBorder(Color(uiColor: .separator).opacity(0.2), lineWidth: 0.5)
+        )
+    }
+}
+
+struct ChatView_Previews: PreviewProvider {
+    static var previews: some View {
+        ChatView(activeTab: .constant(2))
+            .environmentObject(Wallet())
+            .environmentObject(Appearance())
+    }
+}
