@@ -25,6 +25,7 @@ struct CoinsView: View {
             Spacer()
             Text(wallet.formatCurrency(value: wallet.value))
                 .font(appearance.getBalanceFont(size: 34, weight: .bold))
+                .foregroundStyle(Color.appPrimary)
                 .multilineTextAlignment(.center)
             Spacer()
         }

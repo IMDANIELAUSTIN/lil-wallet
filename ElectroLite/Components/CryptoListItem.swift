@@ -24,7 +24,7 @@ struct CryptoListItem: View {
                         Text(token.name == "" ? "Untitled" : token.name)
                             .lineLimit(1)
                             .font(.system(.headline, design: appFont))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color.appPrimary)
                         
                         Spacer()
                         

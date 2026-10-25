@@ -110,6 +110,7 @@ struct ContentView: View {
             }
         }
         .fontDesign(appearance.getAppFont())
+        .foregroundStyle(Color.appPrimary)
         .animation(.easeInOut(duration: 0.16), value: showLaunchScreen())
         .onChange(of: activeTab) { oldValue, newValue in
             if newValue == 1 {
@@ -126,6 +127,7 @@ struct ContentView: View {
                 .environment(\.managedObjectContext, viewContext)
                 .tint(appearance.getAppColor())
                 .fontDesign(appearance.getAppFont())
+        .foregroundStyle(Color.appPrimary)
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }

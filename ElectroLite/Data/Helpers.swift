@@ -61,8 +61,14 @@ class Appearance: ObservableObject {
         
         let navBarAppearance = UINavigationBarAppearance()
         navBarAppearance.configureWithDefaultBackground()
-        navBarAppearance.titleTextAttributes = [.font: roundedTitleFont]
-        navBarAppearance.largeTitleTextAttributes = [.font: roundedLargeTitleFont]
+        navBarAppearance.titleTextAttributes = [
+            .font: roundedTitleFont,
+            .foregroundColor: UIColor.appPrimary
+        ]
+        navBarAppearance.largeTitleTextAttributes = [
+            .font: roundedLargeTitleFont,
+            .foregroundColor: UIColor.appPrimary
+        ]
         
         UINavigationBar.appearance().standardAppearance = navBarAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
@@ -83,6 +89,21 @@ class Appearance: ObservableObject {
     }
 }
 
+extension UIColor {
+    static let appPrimary = UIColor { traitCollection in
+        switch traitCollection.userInterfaceStyle {
+        case .dark:
+            return UIColor(red: 0xF6 / 255.0, green: 0xF5 / 255.0, blue: 0xF3 / 255.0, alpha: 1.0)
+        default:
+            return UIColor(red: 0x29 / 255.0, green: 0x0B / 255.0, blue: 0x00 / 255.0, alpha: 1.0)
+        }
+    }
+}
+
+extension Color {
+    static let appPrimary = Color(uiColor: .appPrimary)
+}
+
 enum AppColor: String, Hashable, CaseIterable, Sendable {
     case monochrome
     case red
@@ -96,7 +117,7 @@ enum AppColor: String, Hashable, CaseIterable, Sendable {
     var color: Color {
         switch self {
         case .monochrome:
-            return Color.primary
+            return Color.appPrimary
         case .red:
             return Color.red
         case .orange:

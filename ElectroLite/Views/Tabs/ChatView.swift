@@ -90,7 +90,7 @@ struct ChatView: View {
                             VStack(spacing: 0) {
                                 chatCategoryRow(
                                     title: "All Chats",
-                                    icon: "bubble.left.fill",
+                                    icon: "message.fill",
                                     iconColor: .blue,
                                     count: allChatsCount
                                 )
@@ -130,7 +130,7 @@ struct ChatView: View {
                             VStack(spacing: 0) {
                                 chatCategoryRow(
                                     title: "Archived Messages",
-                                    icon: "arrow.up.circle.fill",
+                                    icon: "trash.fill",
                                     iconColor: .red,
                                     count: archivedCount
                                 )
@@ -153,6 +153,7 @@ struct ChatView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold, design: appearance.getAppFont()))
+                            .foregroundStyle(Color.appPrimary)
                     }
                 }
                 
@@ -162,6 +163,7 @@ struct ChatView: View {
                     } label: {
                         Image(systemName: "magnifyingglass")
                             .font(.headline)
+                            .foregroundStyle(Color.appPrimary)
                     }
                     .sheet(isPresented: $showActivityView) {
                         ActivityView()
@@ -180,6 +182,7 @@ struct ChatView: View {
                     } label: {
                         Image(systemName: "gear")
                             .font(.headline)
+                            .foregroundStyle(Color.appPrimary)
                     }
                     .sheet(isPresented: $showSettingsView) {
                         SettingsView(showSettingsView: $showSettingsView)
@@ -216,7 +219,7 @@ struct ChatView: View {
                 
                 Text(title)
                     .font(.system(.body, design: appearance.getAppFont()))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.appPrimary)
                 
                 Spacer()
                 
