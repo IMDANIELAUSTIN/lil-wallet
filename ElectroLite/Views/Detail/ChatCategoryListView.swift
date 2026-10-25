@@ -53,6 +53,7 @@ struct ChatMessagePreview: Identifiable, Hashable {
 struct ChatCategoryListView: View {
     let category: ChatCategory
     @State private var showNewChatSheet = CommandLine.arguments.contains("-openNewChatSheet")
+    @State private var navigateToDetail = CommandLine.arguments.contains("-openChatDetail")
     @State private var messages: [ChatMessagePreview] = ChatMessagePreview.sampleList
     
     @EnvironmentObject var wallet: Wallet
@@ -84,8 +85,11 @@ struct ChatCategoryListView: View {
                     // List of chat conversations
                     LazyVStack(spacing: 0) {
                         ForEach(Array(messages.enumerated()), id: \.element.id) { index, chat in
-                            Button {
-                                // Navigation to individual chat message view will be wired in upcoming milestone
+                            NavigationLink {
+                                ChatDetailView(contactName: chat.contactName)
+                                    .environmentObject(wallet)
+                                    .environmentObject(appearance)
+                                    .environment(\.managedObjectContext, viewContext)
                             } label: {
                                 HStack(spacing: 14) {
                                     CheckeredAvatarPlaceholder(size: 50)
@@ -130,6 +134,12 @@ struct ChatCategoryListView: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .navigationDestination(isPresented: $navigateToDetail) {
+            ChatDetailView(contactName: "Contact Name")
+                .environmentObject(wallet)
+                .environmentObject(appearance)
+                .environment(\.managedObjectContext, viewContext)
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
