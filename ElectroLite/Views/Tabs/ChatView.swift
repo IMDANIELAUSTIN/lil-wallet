@@ -22,6 +22,20 @@ struct ChatView: View {
     @State private var showActivityView = false
     @State private var showSettingsView = false
     @State private var pinnedConversations: [PinnedConversation] = CommandLine.arguments.contains("-testFavorites") ? PinnedConversation.sampleFavorites : []
+    @State private var navigationPath: [ChatCategory] = {
+        if CommandLine.arguments.contains("-openCategoryKnownSenders") {
+            return [.knownSenders]
+        } else if CommandLine.arguments.contains("-openCategoryUnknownSenders") {
+            return [.unknownSenders]
+        } else if CommandLine.arguments.contains("-openCategoryUnreadChats") {
+            return [.unreadChats]
+        } else if CommandLine.arguments.contains("-openCategoryArchivedMessages") {
+            return [.archivedMessages]
+        } else if CommandLine.arguments.contains("-openCategoryAllChats") {
+            return [.allChats]
+        }
+        return []
+    }()
     
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
@@ -42,7 +56,7 @@ struct ChatView: View {
     ]
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 Color(uiColor: .systemGroupedBackground)
                     .ignoresSafeArea()
@@ -89,36 +103,28 @@ struct ChatView: View {
                             // Card 1: Main Categories
                             VStack(spacing: 0) {
                                 chatCategoryRow(
-                                    title: "All Chats",
-                                    icon: "message.fill",
-                                    iconColor: .blue,
+                                    category: .allChats,
                                     count: allChatsCount
                                 )
                                 
                                 rowDivider
                                 
                                 chatCategoryRow(
-                                    title: "Known Senders",
-                                    icon: "person.crop.circle.fill",
-                                    iconColor: .blue,
+                                    category: .knownSenders,
                                     count: knownSendersCount
                                 )
                                 
                                 rowDivider
                                 
                                 chatCategoryRow(
-                                    title: "Unknown Senders",
-                                    icon: "person.crop.circle.badge.questionmark.fill",
-                                    iconColor: .blue,
+                                    category: .unknownSenders,
                                     count: unknownSendersCount
                                 )
                                 
                                 rowDivider
                                 
                                 chatCategoryRow(
-                                    title: "Unread Chats",
-                                    icon: "message.badge.filled.fill",
-                                    iconColor: .blue,
+                                    category: .unreadChats,
                                     count: unreadChatsCount
                                 )
                             }
@@ -129,9 +135,7 @@ struct ChatView: View {
                             // Card 2: Archived Messages
                             VStack(spacing: 0) {
                                 chatCategoryRow(
-                                    title: "Archived Messages",
-                                    icon: "trash.fill",
-                                    iconColor: .red,
+                                    category: .archivedMessages,
                                     count: archivedCount
                                 )
                             }
@@ -146,6 +150,12 @@ struct ChatView: View {
             }
             .navigationTitle("Chat")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: ChatCategory.self) { category in
+                ChatCategoryListView(category: category)
+                    .environmentObject(wallet)
+                    .environmentObject(appearance)
+                    .environment(\.managedObjectContext, viewContext)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
@@ -203,21 +213,17 @@ struct ChatView: View {
     
     @ViewBuilder
     private func chatCategoryRow(
-        title: String,
-        icon: String,
-        iconColor: Color,
+        category: ChatCategory,
         count: Int
     ) -> some View {
-        Button {
-            // Action for filter category
-        } label: {
+        NavigationLink(value: category) {
             HStack(spacing: 14) {
-                Image(systemName: icon)
+                Image(systemName: category.icon)
                     .font(.system(size: 24))
-                    .foregroundStyle(iconColor)
+                    .foregroundStyle(category.iconColor)
                     .frame(width: 30, height: 30)
                 
-                Text(title)
+                Text(category.rawValue)
                     .font(.system(.body, design: appearance.getAppFont()))
                     .foregroundStyle(Color.appPrimary)
                 
