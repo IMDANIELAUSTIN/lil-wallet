@@ -52,7 +52,7 @@ struct ChatMessagePreview: Identifiable, Hashable {
 
 struct ChatCategoryListView: View {
     let category: ChatCategory
-    @State private var showSettingsView = false
+    @State private var showNewChatSheet = CommandLine.arguments.contains("-openNewChatSheet")
     @State private var messages: [ChatMessagePreview] = ChatMessagePreview.sampleList
     
     @EnvironmentObject var wallet: Wallet
@@ -143,14 +143,14 @@ struct ChatCategoryListView: View {
             
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    showSettingsView.toggle()
+                    showNewChatSheet.toggle()
                 } label: {
-                    Image(systemName: "gear")
-                        .font(.headline)
+                    Image(systemName: "pencil")
+                        .font(.system(size: 16, weight: .semibold, design: appearance.getAppFont()))
                         .foregroundStyle(Color.appPrimary)
                 }
-                .sheet(isPresented: $showSettingsView) {
-                    SettingsView(showSettingsView: $showSettingsView)
+                .sheet(isPresented: $showNewChatSheet) {
+                    NewChatView(isPresented: $showNewChatSheet)
                         .environmentObject(wallet)
                         .environmentObject(appearance)
                         .environment(\.managedObjectContext, viewContext)
