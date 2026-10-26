@@ -48,6 +48,8 @@ struct ChatView: View {
     @State private var unknownSendersCount = 0
     @State private var unreadChatsCount = 0
     @State private var archivedCount = 0
+    @State private var favoriteThread: ChatThread = ChatThread.sampleThread(contactName: "Contact Name", unreadCount: 3)
+    @State private var showFavoriteThread = false
     
     private let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -74,7 +76,8 @@ struct ChatView: View {
                                 LazyVGrid(columns: columns, spacing: 18) {
                                     ForEach(pinnedConversations.prefix(9)) { conversation in
                                         Button {
-                                            // Handle conversation selection
+                                            favoriteThread = ChatThread.sampleThread(contactName: conversation.name, unreadCount: 3)
+                                            showFavoriteThread = true
                                         } label: {
                                             VStack(spacing: 8) {
                                                 CheckeredAvatarPlaceholder(size: 74)
@@ -152,6 +155,12 @@ struct ChatView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: ChatCategory.self) { category in
                 ChatCategoryListView(category: category)
+                    .environmentObject(wallet)
+                    .environmentObject(appearance)
+                    .environment(\.managedObjectContext, viewContext)
+            }
+            .navigationDestination(isPresented: $showFavoriteThread) {
+                ChatDetailView(thread: $favoriteThread, totalUnreadCount: 3)
                     .environmentObject(wallet)
                     .environmentObject(appearance)
                     .environment(\.managedObjectContext, viewContext)

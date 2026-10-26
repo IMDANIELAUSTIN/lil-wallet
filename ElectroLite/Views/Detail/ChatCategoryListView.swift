@@ -54,7 +54,10 @@ struct ChatCategoryListView: View {
     let category: ChatCategory
     @State private var showNewChatSheet = CommandLine.arguments.contains("-openNewChatSheet")
     @State private var navigateToDetail = CommandLine.arguments.contains("-openChatDetail")
-    @State private var messages: [ChatMessagePreview] = ChatMessagePreview.sampleList
+    @State private var threads: [ChatThread] = (0..<4).map { _ in
+        ChatThread.sampleThread(contactName: "Contact Name", unreadCount: 3)
+    }
+    @State private var defaultDetailThread: ChatThread = ChatThread.sampleThread(contactName: "Contact Name", unreadCount: 3)
     
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
@@ -84,9 +87,10 @@ struct ChatCategoryListView: View {
                     
                     // List of chat conversations
                     LazyVStack(spacing: 0) {
-                        ForEach(Array(messages.enumerated()), id: \.element.id) { index, chat in
+                        ForEach(threads.indices, id: \.self) { index in
+                            let chat = threads[index]
                             NavigationLink {
-                                ChatDetailView(contactName: chat.contactName)
+                                ChatDetailView(thread: $threads[index], totalUnreadCount: 3)
                                     .environmentObject(wallet)
                                     .environmentObject(appearance)
                                     .environment(\.managedObjectContext, viewContext)
@@ -102,7 +106,7 @@ struct ChatCategoryListView: View {
                                             
                                             Spacer()
                                             
-                                            Text(chat.dateString)
+                                            Text(chat.timestamp)
                                                 .font(.system(.subheadline, design: appearance.getAppFont()))
                                                 .foregroundStyle(.secondary)
                                             
@@ -135,7 +139,7 @@ struct ChatCategoryListView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
         .navigationDestination(isPresented: $navigateToDetail) {
-            ChatDetailView(contactName: "Contact Name")
+            ChatDetailView(thread: $defaultDetailThread, totalUnreadCount: 3)
                 .environmentObject(wallet)
                 .environmentObject(appearance)
                 .environment(\.managedObjectContext, viewContext)

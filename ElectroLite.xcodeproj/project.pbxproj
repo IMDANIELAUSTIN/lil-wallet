@@ -30,6 +30,10 @@
 		862133432753E4A1002BD765 /* ChatCategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133422753E4A0002BD765 /* ChatCategoryListView.swift */; };
 		862133452753E4A3002BD765 /* NewChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133442753E4A2002BD765 /* NewChatView.swift */; };
 		862133472753E4A5002BD765 /* ChatDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133462753E4A4002BD765 /* ChatDetailView.swift */; };
+		862133492753E4A7002BD765 /* ChatDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133482753E4A6002BD765 /* ChatDesignSystem.swift */; };
+		8621334B2753E4A9002BD765 /* ChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621334A2753E4A8002BD765 /* ChatModels.swift */; };
+		8621334D2753E4AB002BD765 /* ChatMediaComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621334C2753E4AA002BD765 /* ChatMediaComponents.swift */; };
+		8621334F2753E4AD002BD765 /* ChatVoiceComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621334E2753E4AC002BD765 /* ChatVoiceComponents.swift */; };
 		862133322753E4CA002BD765 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133312753E4CA002BD765 /* SettingsView.swift */; };
 		862133342753E4D6002BD765 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133332753E4D6002BD765 /* ActivityView.swift */; };
 		86A000032753E3EA002BD765 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 86A000022753E3EA002BD765 /* SocketIO */; };
@@ -62,6 +66,10 @@
 		862133422753E4A0002BD765 /* ChatCategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCategoryListView.swift; sourceTree = "<group>"; };
 		862133442753E4A2002BD765 /* NewChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewChatView.swift; sourceTree = "<group>"; };
 		862133462753E4A4002BD765 /* ChatDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDetailView.swift; sourceTree = "<group>"; };
+		862133482753E4A6002BD765 /* ChatDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDesignSystem.swift; sourceTree = "<group>"; };
+		8621334A2753E4A8002BD765 /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModels.swift; sourceTree = "<group>"; };
+		8621334C2753E4AA002BD765 /* ChatMediaComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMediaComponents.swift; sourceTree = "<group>"; };
+		8621334E2753E4AC002BD765 /* ChatVoiceComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatVoiceComponents.swift; sourceTree = "<group>"; };
 		862133312753E4CA002BD765 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		862133332753E4D6002BD765 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -171,6 +179,10 @@
 				862133422753E4A0002BD765 /* ChatCategoryListView.swift */,
 				862133442753E4A2002BD765 /* NewChatView.swift */,
 				862133462753E4A4002BD765 /* ChatDetailView.swift */,
+				862133482753E4A6002BD765 /* ChatDesignSystem.swift */,
+				8621334A2753E4A8002BD765 /* ChatModels.swift */,
+				8621334C2753E4AA002BD765 /* ChatMediaComponents.swift */,
+				8621334E2753E4AC002BD765 /* ChatVoiceComponents.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -287,6 +299,10 @@
 				862133432753E4A1002BD765 /* ChatCategoryListView.swift in Sources */,
 				862133452753E4A3002BD765 /* NewChatView.swift in Sources */,
 				862133472753E4A5002BD765 /* ChatDetailView.swift in Sources */,
+				862133492753E4A7002BD765 /* ChatDesignSystem.swift in Sources */,
+				8621334B2753E4A9002BD765 /* ChatModels.swift in Sources */,
+				8621334D2753E4AB002BD765 /* ChatMediaComponents.swift in Sources */,
+				8621334F2753E4AD002BD765 /* ChatVoiceComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,7 +362,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -404,7 +420,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
