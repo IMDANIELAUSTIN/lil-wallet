@@ -166,16 +166,6 @@ struct ChatView: View {
                     .environment(\.managedObjectContext, viewContext)
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        activeTab = 0
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold, design: appearance.getAppFont()))
-                            .foregroundStyle(Color.appPrimary)
-                    }
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showActivityView.toggle()

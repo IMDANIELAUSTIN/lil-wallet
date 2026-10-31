@@ -17,6 +17,8 @@ struct WalletsView: View {
     @AppStorage("currentWalletAddress") private var currentWalletAddress: String = ""
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
+    @State private var walletToDelete: WalletAddress?
+    @State private var showDeleteWalletAlert = false
     
     var body: some View {
         let appFont = appearance.getAppFont()
@@ -53,11 +55,32 @@ struct WalletsView: View {
                                         .opacity(currentWalletAddress == savedWallet.address ? 1 : 0)
                                 }
                             })
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button {
+                                    walletToDelete = savedWallet
+                                    showDeleteWalletAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                .tint(.red)
+                            }
                         }
-                        .onDelete(perform: deleteWallets)
                     }
                 }
             }
+        }
+        .alert("Delete Wallet?", isPresented: $showDeleteWalletAlert) {
+            Button("Delete", role: .destructive) {
+                if let target = walletToDelete {
+                    deleteWallet(target)
+                }
+                walletToDelete = nil
+            }
+            Button("Cancel", role: .cancel) {
+                walletToDelete = nil
+            }
+        } message: {
+            Text("Continuing with this action is permanent and irreversible. Please continue with care.")
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -83,12 +106,18 @@ struct WalletsView: View {
         }
     }
 
-    private func deleteWallets(offsets: IndexSet) {
+    private func deleteWallet(_ target: WalletAddress) {
+        let deletedAddress = target.address
         withAnimation {
-            offsets.map { wallets[$0] }.forEach(viewContext.delete)
+            viewContext.delete(target)
 
             do {
                 try viewContext.save()
+                if deletedAddress == currentWalletAddress {
+                    let remaining = wallets.first(where: { $0.objectID != target.objectID })
+                    currentWalletAddress = remaining?.address ?? ""
+                    wallet.reload(reset: true, refresh: false)
+                }
             } catch {
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")

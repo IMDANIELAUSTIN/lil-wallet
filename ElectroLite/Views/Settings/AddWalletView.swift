@@ -9,6 +9,7 @@ import SwiftUI
 import CoreData
 
 struct AddWalletView: View {
+    var showsDismissButton: Bool = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.managedObjectContext) private var viewContext
     enum Field: Hashable {
@@ -55,7 +56,17 @@ struct AddWalletView: View {
         }
         .font(.system(.body, design: appearance.getAppFont()))
         .toolbar(content: {
-            ToolbarItem {
+            if showsDismissButton {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold, design: appearance.getAppFont()))
+                            .foregroundStyle(Color.appPrimary)
+                    }
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: saveWallet, label: {
                     if self.loading {
                         ProgressView()
