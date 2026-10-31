@@ -19,6 +19,7 @@ struct PinnedConversation: Identifiable, Hashable {
 
 struct ChatView: View {
     @Binding var activeTab: Int
+    @Binding var isAtRoot: Bool
     @State private var showActivityView = false
     @State private var showSettingsView = false
     @State private var pinnedConversations: [PinnedConversation] = CommandLine.arguments.contains("-testFavorites") ? PinnedConversation.sampleFavorites : []
@@ -36,6 +37,11 @@ struct ChatView: View {
         }
         return []
     }()
+    
+    init(activeTab: Binding<Int>, isAtRoot: Binding<Bool> = .constant(true)) {
+        self._activeTab = activeTab
+        self._isAtRoot = isAtRoot
+    }
     
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
@@ -56,6 +62,10 @@ struct ChatView: View {
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
+    
+    private var currentlyAtRoot: Bool {
+        navigationPath.isEmpty && !showFavoriteThread
+    }
     
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -203,6 +213,12 @@ struct ChatView: View {
             }
         }
         .fontDesign(appearance.getAppFont())
+        .onAppear {
+            isAtRoot = currentlyAtRoot
+        }
+        .onChange(of: currentlyAtRoot) { _, newValue in
+            isAtRoot = newValue
+        }
     }
     
     private var rowDivider: some View {

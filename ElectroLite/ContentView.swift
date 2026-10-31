@@ -12,10 +12,51 @@ struct ContentView: View {
     @State var activeTab = CommandLine.arguments.contains("-openChatTab") ? 2 : 0
     @State private var lastNonProminentTab = 0
     @State private var showScanSheet = false
+    @State private var isChatAtRoot = true
+    @State private var lastTabSwipeTime: Date = .distantPast
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
     @Environment(\.managedObjectContext) private var viewContext
     @State private var timeRemaining = 3
+    
+    private let minDragTranslationForSwipe: CGFloat = 50
+    private let minPredictedTranslationForSwipe: CGFloat = 120
+    
+    private var tabSwipeGesture: some Gesture {
+        DragGesture(minimumDistance: 16, coordinateSpace: .local)
+            .onEnded { value in
+                handleHorizontalSwipe(
+                    translation: value.translation,
+                    predictedEndTranslation: value.predictedEndTranslation
+                )
+            }
+    }
+    
+    private func handleHorizontalSwipe(translation: CGSize, predictedEndTranslation: CGSize) {
+        let now = Date()
+        guard now.timeIntervalSince(lastTabSwipeTime) > 0.25 else { return }
+        
+        let horizontal = translation.width
+        let vertical = translation.height
+        let predictedHorizontal = predictedEndTranslation.width
+        
+        guard abs(horizontal) > abs(vertical) * 1.5 else { return }
+        guard abs(horizontal) > minDragTranslationForSwipe || abs(predictedHorizontal) > minPredictedTranslationForSwipe else { return }
+        
+        if horizontal < 0 && activeTab == 0 {
+            lastTabSwipeTime = now
+            UISelectionFeedbackGenerator().selectionChanged()
+            withAnimation(.interactiveSpring(response: 0.28, dampingFraction: 0.86)) {
+                activeTab = 2
+            }
+        } else if horizontal > 0 && activeTab == 2 && isChatAtRoot {
+            lastTabSwipeTime = now
+            UISelectionFeedbackGenerator().selectionChanged()
+            withAnimation(.interactiveSpring(response: 0.28, dampingFraction: 0.86)) {
+                activeTab = 0
+            }
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -45,7 +86,7 @@ struct ContentView: View {
                         
                         Tab(value: 1, role: .prominent) {
                             if lastNonProminentTab == 2 {
-                                ChatView(activeTab: $activeTab)
+                                ChatView(activeTab: $activeTab, isAtRoot: $isChatAtRoot)
                                     .environmentObject(wallet)
                                     .environmentObject(appearance)
                                     .environment(\.managedObjectContext, viewContext)
@@ -60,7 +101,7 @@ struct ContentView: View {
                         }
                         
                         Tab(value: 2) {
-                            ChatView(activeTab: $activeTab)
+                            ChatView(activeTab: $activeTab, isAtRoot: $isChatAtRoot)
                                 .environmentObject(wallet)
                                 .environmentObject(appearance)
                                 .environment(\.managedObjectContext, viewContext)
@@ -71,7 +112,8 @@ struct ContentView: View {
                     }
                     .tint(appearance.getAppColor())
                     .tabBarMinimizeBehavior(.onScrollDown)
-                    .background(TabBarConfigurator(activeTab: activeTab))
+                    .simultaneousGesture(tabSwipeGesture)
+                    .background(TabBarConfigurator(activeTab: activeTab, onHorizontalSwipe: handleHorizontalSwipe))
                 } else {
                     TabView(selection: $activeTab) {
                         CoinsView()
@@ -95,7 +137,7 @@ struct ContentView: View {
                             }
                             .tag(1)
                         
-                        ChatView(activeTab: $activeTab)
+                        ChatView(activeTab: $activeTab, isAtRoot: $isChatAtRoot)
                             .environmentObject(wallet)
                             .environmentObject(appearance)
                             .environment(\.managedObjectContext, viewContext)
@@ -108,7 +150,8 @@ struct ContentView: View {
                             .tag(2)
                     }
                     .tint(appearance.getAppColor())
-                    .background(TabBarConfigurator(activeTab: activeTab))
+                    .simultaneousGesture(tabSwipeGesture)
+                    .background(TabBarConfigurator(activeTab: activeTab, onHorizontalSwipe: handleHorizontalSwipe))
                 }
             }
         }
@@ -151,13 +194,41 @@ struct ContentView: View {
 
 private struct TabBarConfigurator: UIViewRepresentable {
     var activeTab: Int
+    var onHorizontalSwipe: (CGSize, CGSize) -> Void
     
-    final class Coordinator {
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
         var didMinimizeInitially = false
+        var didInstallPanGesture = false
+        var onHorizontalSwipe: (CGSize, CGSize) -> Void
+        
+        init(onHorizontalSwipe: @escaping (CGSize, CGSize) -> Void) {
+            self.onHorizontalSwipe = onHorizontalSwipe
+        }
+        
+        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+            guard gesture.state == .ended, let view = gesture.view else { return }
+            let translation = gesture.translation(in: view)
+            let velocity = gesture.velocity(in: view)
+            let predictedEnd = CGSize(
+                width: translation.x + velocity.x * 0.15,
+                height: translation.y + velocity.y * 0.15
+            )
+            onHorizontalSwipe(
+                CGSize(width: translation.x, height: translation.y),
+                predictedEnd
+            )
+        }
+        
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+        ) -> Bool {
+            true
+        }
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(onHorizontalSwipe: onHorizontalSwipe)
     }
     
     private static let symbolConfig: UIImage.SymbolConfiguration = {
@@ -186,6 +257,7 @@ private struct TabBarConfigurator: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.onHorizontalSwipe = onHorizontalSwipe
         self.configureTabBar(from: uiView, coordinator: context.coordinator)
     }
     
@@ -217,6 +289,13 @@ private struct TabBarConfigurator: UIViewRepresentable {
         if #available(iOS 18.0, *),
            let rootVC = window.rootViewController,
            let tbc = findTabBarController(in: rootVC) {
+            if !coordinator.didInstallPanGesture {
+                let pan = UIPanGestureRecognizer(target: coordinator, action: #selector(Coordinator.handlePan(_:)))
+                pan.cancelsTouchesInView = false
+                pan.delegate = coordinator
+                tbc.view.addGestureRecognizer(pan)
+                coordinator.didInstallPanGesture = true
+            }
             for tab in tbc.tabs {
                 switch tab.title {
                 case "Home":
