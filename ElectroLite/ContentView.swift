@@ -23,8 +23,11 @@ struct ContentView: View {
                 // loading view
                 VStack {
                     Spacer()
-                    Text(Image(systemName: "square.on.circle"))
-                        .font(.system(size: 56, weight: .medium, design: .rounded))
+                    Image("SettingsLogo")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 56, height: 56)
                         .foregroundStyle(appearance.getAppColor())
                     Spacer()
                 }

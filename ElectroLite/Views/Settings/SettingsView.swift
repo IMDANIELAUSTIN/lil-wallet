@@ -92,8 +92,11 @@ struct SettingsView: View {
                 Section {
                     HStack {
                         Spacer()
-                        Image(systemName: "square.on.circle")
-                            .font(.system(size: 24, weight: .semibold))
+                        Image("SettingsLogo")
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
                             .foregroundStyle(.tertiary)
                         Spacer()
                     }

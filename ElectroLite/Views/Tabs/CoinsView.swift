@@ -10,7 +10,7 @@ import CoreData
 
 struct CoinsView: View {
     @State private var showActivityView = false
-    @State private var showSettingsView = false
+    @State private var showSettingsView = CommandLine.arguments.contains("-openSettings")
     @State private var showAddWalletView = false
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
