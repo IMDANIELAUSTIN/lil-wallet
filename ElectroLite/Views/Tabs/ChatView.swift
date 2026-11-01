@@ -48,14 +48,36 @@ struct ChatView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
     
-    // Counts for chat categories
+    // Shared conversation threads across categories, Favorites, and Archived Messages
+    @State private var threads: [ChatThread] = {
+        var list = (0..<4).map { _ in
+            ChatThread.sampleThread(contactName: "Contact Name", unreadCount: 3)
+        }
+        if CommandLine.arguments.contains("-seedArchivedThread") {
+            var archived = ChatThread.sampleThread(contactName: "Contact Name", unreadCount: 0)
+            archived.isArchived = true
+            list.append(archived)
+        }
+        if CommandLine.arguments.contains("-seedFavoriteThread"), !list.isEmpty {
+            list[0].isPinned = true
+        }
+        return list
+    }()
     @State private var allChatsCount = 0
     @State private var knownSendersCount = 0
     @State private var unknownSendersCount = 0
     @State private var unreadChatsCount = 0
-    @State private var archivedCount = 0
     @State private var favoriteThread: ChatThread = ChatThread.sampleThread(contactName: "Contact Name", unreadCount: 3)
+    @State private var selectedFavoriteThreadID: UUID?
     @State private var showFavoriteThread = false
+    
+    private var archivedCount: Int {
+        threads.filter { $0.isArchived }.count
+    }
+    
+    private var favoritedThreads: [ChatThread] {
+        threads.filter { $0.isPinned && !$0.isArchived }
+    }
     
     private let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -82,10 +104,31 @@ struct ChatView: View {
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal, 20)
                             
-                            if !pinnedConversations.isEmpty {
+                            if !favoritedThreads.isEmpty {
+                                LazyVGrid(columns: columns, spacing: 18) {
+                                    ForEach(favoritedThreads.prefix(9)) { thread in
+                                        Button {
+                                            selectedFavoriteThreadID = thread.id
+                                            showFavoriteThread = true
+                                        } label: {
+                                            VStack(spacing: 8) {
+                                                CheckeredAvatarPlaceholder(size: 74)
+                                                
+                                                Text(thread.contactName)
+                                                    .font(.system(.subheadline, design: appearance.getAppFont()))
+                                                    .foregroundStyle(Color(uiColor: .secondaryLabel))
+                                                    .lineLimit(1)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            } else if !pinnedConversations.isEmpty {
                                 LazyVGrid(columns: columns, spacing: 18) {
                                     ForEach(pinnedConversations.prefix(9)) { conversation in
                                         Button {
+                                            selectedFavoriteThreadID = nil
                                             favoriteThread = ChatThread.sampleThread(contactName: conversation.name, unreadCount: 3)
                                             showFavoriteThread = true
                                         } label: {
@@ -164,16 +207,23 @@ struct ChatView: View {
             .navigationTitle("Chat")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: ChatCategory.self) { category in
-                ChatCategoryListView(category: category)
+                ChatCategoryListView(category: category, threads: $threads)
                     .environmentObject(wallet)
                     .environmentObject(appearance)
                     .environment(\.managedObjectContext, viewContext)
             }
             .navigationDestination(isPresented: $showFavoriteThread) {
-                ChatDetailView(thread: $favoriteThread, totalUnreadCount: 3)
-                    .environmentObject(wallet)
-                    .environmentObject(appearance)
-                    .environment(\.managedObjectContext, viewContext)
+                if let id = selectedFavoriteThreadID, let index = threads.firstIndex(where: { $0.id == id }) {
+                    ChatDetailView(thread: $threads[index], totalUnreadCount: 3)
+                        .environmentObject(wallet)
+                        .environmentObject(appearance)
+                        .environment(\.managedObjectContext, viewContext)
+                } else {
+                    ChatDetailView(thread: $favoriteThread, totalUnreadCount: 3)
+                        .environmentObject(wallet)
+                        .environmentObject(appearance)
+                        .environment(\.managedObjectContext, viewContext)
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

@@ -108,6 +108,8 @@ public struct ChatThread: Identifiable, Hashable {
     public var timestamp: String
     public var messages: [ChatMessage]
     public var isPinned: Bool
+    public var isArchived: Bool
+    public var isKnownSender: Bool
     public var isGroup: Bool
     public var participantsCount: Int
     public var isMeshOnly: Bool
@@ -124,6 +126,8 @@ public struct ChatThread: Identifiable, Hashable {
         timestamp: String = "Now",
         messages: [ChatMessage] = [],
         isPinned: Bool = false,
+        isArchived: Bool = false,
+        isKnownSender: Bool = true,
         isGroup: Bool = false,
         participantsCount: Int = 1,
         isMeshOnly: Bool = false,
@@ -139,6 +143,8 @@ public struct ChatThread: Identifiable, Hashable {
         self.timestamp = timestamp
         self.messages = messages
         self.isPinned = isPinned
+        self.isArchived = isArchived
+        self.isKnownSender = isKnownSender
         self.isGroup = isGroup
         self.participantsCount = participantsCount
         self.isMeshOnly = isMeshOnly
