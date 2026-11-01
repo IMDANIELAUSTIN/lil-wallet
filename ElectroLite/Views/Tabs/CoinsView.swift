@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 
 struct CoinsView: View {
-    @State private var showActivityView = false
+    @State private var showActivityView = CommandLine.arguments.contains("-openActivity")
     @State private var showSettingsView = CommandLine.arguments.contains("-openSettings")
     @State private var showAddWalletView = false
     @EnvironmentObject var wallet: Wallet

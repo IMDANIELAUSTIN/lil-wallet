@@ -142,7 +142,7 @@ struct ChatView: View {
                                 )
                             }
                             .background(Color(uiColor: .secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                             .padding(.horizontal, 16)
                             
                             // Card 2: Archived Messages
@@ -153,7 +153,7 @@ struct ChatView: View {
                                 )
                             }
                             .background(Color(uiColor: .secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                             .padding(.horizontal, 16)
                             .padding(.top, 6)
                         }
