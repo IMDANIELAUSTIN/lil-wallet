@@ -82,7 +82,7 @@ struct ObjectsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "magnifyingglass").font(.headline) })
+                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "text.page").font(.headline) })
                         .sheet(isPresented: $showActivityView) {
                             ActivityView()
                                 .environmentObject(wallet)

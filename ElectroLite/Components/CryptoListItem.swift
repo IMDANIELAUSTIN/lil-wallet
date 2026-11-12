@@ -11,41 +11,54 @@ struct CryptoListItem: View {
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
     let token: Token
+    var onSelect: (() -> Void)? = nil
     
-    var body: some View {
+    private var rowContent: some View {
         let appFont = appearance.getAppFont()
         
-        NavigationLink(destination: CryptoDetailView(token: token), label: {
-            HStack(alignment: .center, spacing: 12) {
-                AvatarView(text: token.name, iconURL: token.iconURL)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 8) {
-                        Text(token.name == "" ? "Untitled" : token.name)
-                            .lineLimit(1)
-                            .font(.system(.headline, design: appFont))
-                            .foregroundStyle(Color.appPrimary)
-                        
-                        Spacer()
-                        
-                        Text(token.percentChange())
-                            .font(.system(.callout, design: appFont))
-                            .foregroundStyle(.secondary)
-                    }
+        return HStack(alignment: .center, spacing: 12) {
+            AvatarView(text: token.name, iconURL: token.iconURL)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 8) {
+                    Text(token.name == "" ? "Untitled" : token.name)
+                        .lineLimit(1)
+                        .font(.system(.headline, design: appFont))
+                        .foregroundStyle(Color.appPrimary)
                     
-                    Text("\(wallet.formatCurrency(value: token.value()))")
-                        .font(.system(.body, design: appFont))
+                    Spacer()
+                    
+                    Text(token.percentChange())
+                        .font(.system(.callout, design: appFont))
                         .foregroundStyle(.secondary)
                 }
                 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold, design: appFont))
-                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
+                Text("\(wallet.formatCurrency(value: token.value()))")
+                    .font(.system(.body, design: appFont))
+                    .foregroundStyle(.secondary)
             }
-            .padding(.vertical, 10)
-            .contentShape(Rectangle())
-        })
-        .buttonStyle(.plain)
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold, design: appFont))
+                .foregroundStyle(Color(uiColor: .tertiaryLabel))
+        }
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+    }
+    
+    var body: some View {
+        Group {
+            if let onSelect {
+                rowContent
+                    .onTapGesture(perform: onSelect)
+            } else {
+                NavigationLink(destination: CryptoDetailView(token: token)) {
+                    rowContent
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .contentShape(.dragPreview, RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 

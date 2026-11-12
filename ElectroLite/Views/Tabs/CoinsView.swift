@@ -7,11 +7,14 @@
 
 import SwiftUI
 import CoreData
+import UniformTypeIdentifiers
 
 struct CoinsView: View {
     @State private var showActivityView = CommandLine.arguments.contains("-openActivity")
     @State private var showSettingsView = CommandLine.arguments.contains("-openSettings")
     @State private var showAddWalletView = false
+    @State private var draggedToken: Token?
+    @State private var selectedToken: Token?
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
     @Environment(\.managedObjectContext) private var viewContext
@@ -98,9 +101,25 @@ struct CoinsView: View {
                                 } else {
                                     VStack(spacing: 2) {
                                         ForEach(wallet.tokens) { token in
-                                            CryptoListItem(token: token)
+                                            CryptoListItem(
+                                                token: token,
+                                                onSelect: { selectedToken = token }
+                                            )
+                                            .onDrag {
+                                                self.draggedToken = token
+                                                return NSItemProvider(object: token.id as NSString)
+                                            }
+                                            .onDrop(
+                                                of: [UTType.text],
+                                                delegate: PortfolioDropDelegate(
+                                                    targetToken: token,
+                                                    wallet: wallet,
+                                                    draggedToken: $draggedToken
+                                                )
+                                            )
                                         }
                                     }
+                                    .animation(.interactiveSpring(response: 0.28, dampingFraction: 0.82), value: wallet.tokens)
                                 }
                             }
                             .padding(.horizontal, 16)
@@ -147,9 +166,12 @@ struct CoinsView: View {
             }
             .background(Color(uiColor: .systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(item: $selectedToken) { token in
+                CryptoDetailView(token: token)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "magnifyingglass").font(.headline) })
+                    Button(action: { showActivityView.toggle() }, label: { Image(systemName: "text.page").font(.headline) })
                         .sheet(isPresented: $showActivityView) {
                             ActivityView()
                                 .environmentObject(wallet)
@@ -178,5 +200,28 @@ struct CoinsView: View {
 struct CryptoView_Previews: PreviewProvider {
     static var previews: some View {
         CoinsView()
+    }
+}
+
+private struct PortfolioDropDelegate: DropDelegate {
+    let targetToken: Token
+    let wallet: Wallet
+    @Binding var draggedToken: Token?
+    
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+    
+    func performDrop(info: DropInfo) -> Bool {
+        draggedToken = nil
+        return true
+    }
+    
+    func dropEntered(info: DropInfo) {
+        guard let draggedToken, draggedToken.id != targetToken.id else { return }
+        UISelectionFeedbackGenerator().selectionChanged()
+        withAnimation(.interactiveSpring(response: 0.28, dampingFraction: 0.82)) {
+            wallet.reorderToken(dragged: draggedToken, target: targetToken)
+        }
     }
 }

@@ -55,6 +55,7 @@ class Wallet: ObservableObject {
     @Published var loadingTransactions = true
     @Published var transactionCategories: [String: String] = (UserDefaults.standard.dictionary(forKey: "transactionCategories") as? [String: String]) ?? [:]
     @Published var transactionMerchants: [String: String] = (UserDefaults.standard.dictionary(forKey: "transactionMerchants") as? [String: String]) ?? [:]
+    @Published var portfolioTokenOrder: [String] = (UserDefaults.standard.stringArray(forKey: "portfolioTokenOrder")) ?? []
     
     private var fallbackTask: Task<Void, Never>?
     
@@ -107,6 +108,45 @@ class Wallet: ObservableObject {
             transactionMerchants[transaction.id] = trimmed
         }
         UserDefaults.standard.set(transactionMerchants, forKey: "transactionMerchants")
+    }
+    
+    func applySavedTokenOrder(_ list: [Token]) -> [Token] {
+        let alphabetical = list.sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+        guard !portfolioTokenOrder.isEmpty else {
+            return alphabetical
+        }
+        let orderIndex = Dictionary(uniqueKeysWithValues: portfolioTokenOrder.enumerated().map { ($1, $0) })
+        return alphabetical.sorted { lhs, rhs in
+            switch (orderIndex[lhs.id], orderIndex[rhs.id]) {
+            case let (lIdx?, rIdx?):
+                return lIdx < rIdx
+            case (_?, nil):
+                return true
+            case (nil, _?):
+                return false
+            case (nil, nil):
+                return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+            }
+        }
+    }
+    
+    func moveTokens(fromOffsets source: IndexSet, toOffset destination: Int) {
+        tokens.move(fromOffsets: source, toOffset: destination)
+        portfolioTokenOrder = tokens.map(\.id)
+        UserDefaults.standard.set(portfolioTokenOrder, forKey: "portfolioTokenOrder")
+    }
+    
+    func reorderToken(dragged: Token, target: Token) {
+        guard dragged.id != target.id,
+              let fromIndex = tokens.firstIndex(where: { $0.id == dragged.id }),
+              let toIndex = tokens.firstIndex(where: { $0.id == target.id }) else {
+            return
+        }
+        tokens.move(fromOffsets: IndexSet(integer: fromIndex), toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex)
+        portfolioTokenOrder = tokens.map(\.id)
+        UserDefaults.standard.set(portfolioTokenOrder, forKey: "portfolioTokenOrder")
     }
     
     func reload(reset: Bool, refresh: Bool) {
@@ -220,7 +260,7 @@ class Wallet: ObservableObject {
             let finalTokens = parsedTokens
             Task { @MainActor [weak self] in
                 guard let self = self, !finalTokens.isEmpty else { return }
-                self.tokens = finalTokens.map { item in
+                let mappedTokens = finalTokens.map { item in
                     Token(
                         id: item.id,
                         name: item.name,
@@ -232,7 +272,8 @@ class Wallet: ObservableObject {
                         ),
                         iconURL: item.iconURL
                     )
-                }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+                }
+                self.tokens = self.applySavedTokenOrder(mappedTokens)
                 self.loadingTokens = false
             }
         }
@@ -441,9 +482,7 @@ class Wallet: ObservableObject {
         )
         
         if self.loadingTokens {
-            let tokenList = [ethToken, usdcToken, ensToken].sorted {
-                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
-            }
+            let tokenList = self.applySavedTokenOrder([ethToken, usdcToken, ensToken])
             self.tokens = tokenList
             self.loadingTokens = false
             
@@ -702,7 +741,7 @@ struct OpenSeaAssetTrait: Codable, Identifiable, Sendable {
     }
 }
 
-struct Token: Identifiable, Sendable {
+struct Token: Identifiable, Equatable, Hashable, Sendable {
     let id: String
     let name: String
     let symbol: String
@@ -731,7 +770,7 @@ struct Token: Identifiable, Sendable {
     }
 }
 
-struct Price: Sendable {
+struct Price: Equatable, Hashable, Sendable {
     let value: Double
     let relative_change: Double
 }

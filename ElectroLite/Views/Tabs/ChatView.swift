@@ -230,7 +230,7 @@ struct ChatView: View {
                     Button {
                         showActivityView.toggle()
                     } label: {
-                        Image(systemName: "magnifyingglass")
+                        Image(systemName: "text.page")
                             .font(.headline)
                             .foregroundStyle(Color.appPrimary)
                     }
