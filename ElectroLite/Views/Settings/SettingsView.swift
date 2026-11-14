@@ -25,6 +25,17 @@ struct SettingsView: View {
     @State private var showAddWalletSheet = CommandLine.arguments.contains("-openAddWalletSheet")
     @State private var walletToDelete: WalletAddress?
     @State private var showDeleteWalletAlert = CommandLine.arguments.contains("-openDeleteWalletAlert")
+    @State private var showingSupportCenterSheet = false
+    @State private var showingAcknowledgementsSheet = false
+    @State private var showingPrivacyPolicySheet = false
+    @State private var showingTermsSheet = false
+
+    private var appVersionDisplay: String {
+        let info = Bundle.main.infoDictionary
+        let shortVersion = info?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let buildNumber = info?["CFBundleVersion"] as? String ?? "1"
+        return "\(shortVersion) (\(buildNumber))"
+    }
     
     var body: some View {
         let appFont = appearance.getAppFont()
@@ -112,23 +123,8 @@ struct SettingsView: View {
                     Text("Uses demo objects automatically when no API key is configured.")
                 })
                 
-                Section {
-                    NavigationLink {
-                        List {
-                            Section(content: {
-                                Link("Zerion", destination: URL(string: "https://docs.zerion.io")!)
-                                Link("OpenSea", destination: URL(string: "https://docs.opensea.io")!)
-                            }, header: { Text("Data") })
-                            
-                            Section(content: {
-                                Link("Daniel Lee Austin", destination: URL(string: "https://twitter.com/imdanielaustin")!)
-                            }, header: { Text("Contributors") })
-                        }
-                    } label: {
-                        Text("About")
-                            .font(.system(.body, design: appFont))
-                    }
-                }
+                aboutSection(appFont: appFont)
+                appInformationSection(appFont: appFont)
                 
                 Section {
                     HStack {
@@ -193,11 +189,146 @@ struct SettingsView: View {
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
             }
+            .sheet(isPresented: $showingSupportCenterSheet) {
+                SupportCenterView()
+                    .environmentObject(appearance)
+                    .tint(appearance.getAppColor())
+                    .fontDesign(appFont)
+                    .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showingAcknowledgementsSheet) {
+                NavigationStack {
+                    AcknowledgementsView()
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Done") {
+                                    showingAcknowledgementsSheet = false
+                                }
+                                .fontWeight(.semibold)
+                                .foregroundStyle(Color.appPrimary)
+                            }
+                        }
+                }
+                .environmentObject(appearance)
+                .tint(appearance.getAppColor())
+                .fontDesign(appFont)
+                .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showingPrivacyPolicySheet) {
+                PrivacyPolicyView()
+                    .environmentObject(appearance)
+                    .tint(appearance.getAppColor())
+                    .fontDesign(appFont)
+                    .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showingTermsSheet) {
+                TermsOfServiceView()
+                    .environmentObject(appearance)
+                    .tint(appearance.getAppColor())
+                    .fontDesign(appFont)
+                    .presentationDetents([.large])
+            }
         }
         .tint(appearance.getAppColor())
         .fontDesign(appFont)
         .onChange(of: appFont) {
             appearance.updateNavBarTypography()
+        }
+    }
+
+    @ViewBuilder
+    private func aboutSection(appFont: Font.Design) -> some View {
+        Section("About") {
+            aboutTopicLink(.cashu, appFont: appFont)
+            aboutTopicLink(.nuts, appFont: appFont)
+            aboutTopicLink(.bitcoin, appFont: appFont)
+            aboutTopicLink(.bitcoinCore, appFont: appFont)
+            aboutTopicLink(.stablecoins, appFont: appFont)
+        }
+    }
+
+    private func aboutTopicLink(_ topic: WalletAboutDetailView.Topic, appFont: Font.Design) -> some View {
+        NavigationLink {
+            WalletAboutDetailView(topic: topic)
+        } label: {
+            Text(topic.title)
+                .font(.system(.body, design: appFont))
+                .foregroundStyle(Color.appPrimary)
+        }
+    }
+
+    @ViewBuilder
+    private func appInformationSection(appFont: Font.Design) -> some View {
+        Section("App Information") {
+            NavigationLink {
+                UpcomingFeaturesView()
+            } label: {
+                appInfoRowLabel("Upcoming Features", symbol: "star.fill", design: appFont)
+            }
+
+            NavigationLink {
+                ProFeaturesView()
+            } label: {
+                appInfoRowLabel("Pro Features", symbol: "heart.fill", design: appFont)
+            }
+
+            Button {
+                showingSupportCenterSheet = true
+            } label: {
+                appInfoRowLabel("Support Center", symbol: "questionmark.circle.fill", design: appFont)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                showingAcknowledgementsSheet = true
+            } label: {
+                appInfoRowLabel("Acknowledgements", symbol: "doc.text.fill", design: appFont)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                showingPrivacyPolicySheet = true
+            } label: {
+                appInfoRowLabel("Privacy Policy", symbol: "hand.raised.fill", design: appFont)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                showingTermsSheet = true
+            } label: {
+                appInfoRowLabel("Terms of Service", symbol: "doc.text.fill", design: appFont)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            HStack {
+                Text("Version")
+                    .font(.system(.body, design: appFont))
+                    .foregroundStyle(Color.appPrimary)
+                Spacer()
+                Text(appVersionDisplay)
+                    .font(.system(.body, design: appFont))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func appInfoRowLabel(_ title: String, symbol: String, design: Font.Design) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(Color.appPrimary)
+                .frame(width: 24)
+            Text(title)
+                .font(.system(.body, design: design))
+                .foregroundStyle(Color.appPrimary)
         }
     }
     

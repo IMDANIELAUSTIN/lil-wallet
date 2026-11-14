@@ -22,11 +22,13 @@
 		862133262753E485002BD765 /* ObjectGridItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133252753E485002BD765 /* ObjectGridItem.swift */; };
 		862133282753E48F002BD765 /* CoinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133272753E48F002BD765 /* CoinsView.swift */; };
 		8621332A2753E4A1002BD765 /* ObjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133292753E4A0002BD765 /* ObjectsView.swift */; };
-		862133412753E4A1002BD765 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133402753E4A0002BD765 /* ChatView.swift */; };
-		862133362753E4E0002BD765 /* ScanQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133352753E4E0002BD765 /* ScanQRView.swift */; };
 		8621332C2753E4B5002BD765 /* CryptoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621332B2753E4B5002BD765 /* CryptoDetailView.swift */; };
 		8621332E2753E4BD002BD765 /* ActivityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621332D2753E4BD002BD765 /* ActivityDetailView.swift */; };
 		862133302753E4C3002BD765 /* ObjectDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621332F2753E4C3002BD765 /* ObjectDetailView.swift */; };
+		862133322753E4CA002BD765 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133312753E4CA002BD765 /* SettingsView.swift */; };
+		862133342753E4D6002BD765 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133332753E4D6002BD765 /* ActivityView.swift */; };
+		862133362753E4E0002BD765 /* ScanQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133352753E4E0002BD765 /* ScanQRView.swift */; };
+		862133412753E4A1002BD765 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133402753E4A0002BD765 /* ChatView.swift */; };
 		862133432753E4A1002BD765 /* ChatCategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133422753E4A0002BD765 /* ChatCategoryListView.swift */; };
 		862133452753E4A3002BD765 /* NewChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133442753E4A2002BD765 /* NewChatView.swift */; };
 		862133472753E4A5002BD765 /* ChatDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133462753E4A4002BD765 /* ChatDetailView.swift */; };
@@ -34,10 +36,16 @@
 		8621334B2753E4A9002BD765 /* ChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621334A2753E4A8002BD765 /* ChatModels.swift */; };
 		8621334D2753E4AB002BD765 /* ChatMediaComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621334C2753E4AA002BD765 /* ChatMediaComponents.swift */; };
 		8621334F2753E4AD002BD765 /* ChatVoiceComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621334E2753E4AC002BD765 /* ChatVoiceComponents.swift */; };
-		862133322753E4CA002BD765 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133312753E4CA002BD765 /* SettingsView.swift */; };
-		862133342753E4D6002BD765 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862133332753E4D6002BD765 /* ActivityView.swift */; };
 		86A000032753E3EA002BD765 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 86A000022753E3EA002BD765 /* SocketIO */; };
 		86A000052753E3EA002BD765 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */; };
+		86B0000127556000006E6295 /* SettingsCardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0000227556000006E6295 /* SettingsCardComponents.swift */; };
+		86B0000327556000006E6295 /* WalletAboutDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0000427556000006E6295 /* WalletAboutDetailView.swift */; };
+		86B0000527556000006E6295 /* UpcomingFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0000627556000006E6295 /* UpcomingFeaturesView.swift */; };
+		86B0000727556000006E6295 /* ProFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0000827556000006E6295 /* ProFeaturesView.swift */; };
+		86B0000927556000006E6295 /* SupportCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0000A27556000006E6295 /* SupportCenterView.swift */; };
+		86B0000B27556000006E6295 /* AcknowledgementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0000C27556000006E6295 /* AcknowledgementsView.swift */; };
+		86B0000D27556000006E6295 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0000E27556000006E6295 /* PrivacyPolicyView.swift */; };
+		86B0000F27556000006E6295 /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86B0001027556000006E6295 /* TermsOfServiceView.swift */; };
 		86F4D61927694FC3005094BE /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F4D61827694FC3005094BE /* Data.swift */; };
 /* End PBXBuildFile section */
 
@@ -58,11 +66,13 @@
 		862133252753E485002BD765 /* ObjectGridItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectGridItem.swift; sourceTree = "<group>"; };
 		862133272753E48F002BD765 /* CoinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinsView.swift; sourceTree = "<group>"; };
 		862133292753E4A0002BD765 /* ObjectsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectsView.swift; sourceTree = "<group>"; };
-		862133402753E4A0002BD765 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
-		862133352753E4E0002BD765 /* ScanQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQRView.swift; sourceTree = "<group>"; };
 		8621332B2753E4B5002BD765 /* CryptoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoDetailView.swift; sourceTree = "<group>"; };
 		8621332D2753E4BD002BD765 /* ActivityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetailView.swift; sourceTree = "<group>"; };
 		8621332F2753E4C3002BD765 /* ObjectDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetailView.swift; sourceTree = "<group>"; };
+		862133312753E4CA002BD765 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		862133332753E4D6002BD765 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		862133352753E4E0002BD765 /* ScanQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQRView.swift; sourceTree = "<group>"; };
+		862133402753E4A0002BD765 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		862133422753E4A0002BD765 /* ChatCategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCategoryListView.swift; sourceTree = "<group>"; };
 		862133442753E4A2002BD765 /* NewChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewChatView.swift; sourceTree = "<group>"; };
 		862133462753E4A4002BD765 /* ChatDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDetailView.swift; sourceTree = "<group>"; };
@@ -70,9 +80,15 @@
 		8621334A2753E4A8002BD765 /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModels.swift; sourceTree = "<group>"; };
 		8621334C2753E4AA002BD765 /* ChatMediaComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMediaComponents.swift; sourceTree = "<group>"; };
 		8621334E2753E4AC002BD765 /* ChatVoiceComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatVoiceComponents.swift; sourceTree = "<group>"; };
-		862133312753E4CA002BD765 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		862133332753E4D6002BD765 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		86B0000227556000006E6295 /* SettingsCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCardComponents.swift; sourceTree = "<group>"; };
+		86B0000427556000006E6295 /* WalletAboutDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletAboutDetailView.swift; sourceTree = "<group>"; };
+		86B0000627556000006E6295 /* UpcomingFeaturesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpcomingFeaturesView.swift; sourceTree = "<group>"; };
+		86B0000827556000006E6295 /* ProFeaturesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProFeaturesView.swift; sourceTree = "<group>"; };
+		86B0000A27556000006E6295 /* SupportCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportCenterView.swift; sourceTree = "<group>"; };
+		86B0000C27556000006E6295 /* AcknowledgementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcknowledgementsView.swift; sourceTree = "<group>"; };
+		86B0000E27556000006E6295 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		86B0001027556000006E6295 /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 		86F4D61827694FC3005094BE /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,6 +110,14 @@
 				862133312753E4CA002BD765 /* SettingsView.swift */,
 				861F66162753F0F5006E6295 /* WalletsView.swift */,
 				861F66182753FEE1006E6295 /* AddWalletView.swift */,
+				86B0000227556000006E6295 /* SettingsCardComponents.swift */,
+				86B0000427556000006E6295 /* WalletAboutDetailView.swift */,
+				86B0000627556000006E6295 /* UpcomingFeaturesView.swift */,
+				86B0000827556000006E6295 /* ProFeaturesView.swift */,
+				86B0000A27556000006E6295 /* SupportCenterView.swift */,
+				86B0000C27556000006E6295 /* AcknowledgementsView.swift */,
+				86B0000E27556000006E6295 /* PrivacyPolicyView.swift */,
+				86B0001027556000006E6295 /* TermsOfServiceView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -303,6 +327,14 @@
 				8621334B2753E4A9002BD765 /* ChatModels.swift in Sources */,
 				8621334D2753E4AB002BD765 /* ChatMediaComponents.swift in Sources */,
 				8621334F2753E4AD002BD765 /* ChatVoiceComponents.swift in Sources */,
+				86B0000127556000006E6295 /* SettingsCardComponents.swift in Sources */,
+				86B0000327556000006E6295 /* WalletAboutDetailView.swift in Sources */,
+				86B0000527556000006E6295 /* UpcomingFeaturesView.swift in Sources */,
+				86B0000727556000006E6295 /* ProFeaturesView.swift in Sources */,
+				86B0000927556000006E6295 /* SupportCenterView.swift in Sources */,
+				86B0000B27556000006E6295 /* AcknowledgementsView.swift in Sources */,
+				86B0000D27556000006E6295 /* PrivacyPolicyView.swift in Sources */,
+				86B0000F27556000006E6295 /* TermsOfServiceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,7 +473,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"ElectroLite/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "ElectroLite—Crypto Wallet";
+				INFOPLIST_KEY_CFBundleDisplayName = Salt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -475,7 +507,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"ElectroLite/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "ElectroLite—Crypto Wallet";
+				INFOPLIST_KEY_CFBundleDisplayName = Salt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
