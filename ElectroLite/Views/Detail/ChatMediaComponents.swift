@@ -25,6 +25,24 @@ public struct IdentifiableURL: Identifiable {
     }
 }
 
+// MARK: - Send Transition Helpers
+
+/// Conditionally attaches `.matchedGeometryEffect` when both an identifier and
+/// namespace are provided, avoiding structural view-tree branches.
+struct OptionalMatchedGeometry: ViewModifier {
+    let id: String?
+    let namespace: Namespace.ID?
+    var properties: MatchedGeometryProperties = .frame
+
+    func body(content: Content) -> some View {
+        if let id, let namespace {
+            content.matchedGeometryEffect(id: id, in: namespace, properties: properties)
+        } else {
+            content
+        }
+    }
+}
+
 // MARK: - Async Off-Main-Thread Disk Image Thumbnail
 
 public struct DiskImageThumbnail: View {
@@ -33,16 +51,30 @@ public struct DiskImageThumbnail: View {
     @State private var image: UIImage?
 
     private static let cache = NSCache<NSURL, UIImage>()
+    private static let previewCache = NSCache<NSURL, UIImage>()
 
     public init(url: URL, fill: Bool = true) {
         self.url = url
         self.fill = fill
     }
 
+    /// Seeds a composer thumbnail before async disk decoding finishes so
+    /// composer-to-scrollview flights render pixels on the very first frame.
+    @MainActor
+    public static func prewarmPreview(_ image: UIImage, for url: URL) {
+        previewCache.setObject(image, forKey: url as NSURL)
+    }
+
+    @MainActor
+    public static func prewarmFull(_ image: UIImage, for url: URL) {
+        cache.setObject(image, forKey: url as NSURL)
+        previewCache.removeObject(forKey: url as NSURL)
+    }
+
     public var body: some View {
         Group {
-            if let image {
-                Image(uiImage: image)
+            if let displayImage = image ?? Self.cache.object(forKey: url as NSURL) ?? Self.previewCache.object(forKey: url as NSURL) {
+                Image(uiImage: displayImage)
                     .resizable()
                     .aspectRatio(contentMode: fill ? .fill : .fit)
             } else {
@@ -65,7 +97,7 @@ public struct DiskImageThumbnail: View {
             return img
         }.value
         if let loaded {
-            Self.cache.setObject(loaded, forKey: url as NSURL)
+            Self.prewarmFull(loaded, for: url)
             image = loaded
         }
     }
@@ -79,6 +111,8 @@ public struct ImageStackBubble: View {
     public let namespace: Namespace.ID
     public let geometryID: String
     public let isHeroSource: Bool
+    public var sendFlightNamespace: Namespace.ID? = nil
+    public var sendFlightID: UUID? = nil
     public let onTap: () -> Void
 
     private static let cardWidth: CGFloat = 180
@@ -98,6 +132,8 @@ public struct ImageStackBubble: View {
         namespace: Namespace.ID,
         geometryID: String,
         isHeroSource: Bool,
+        sendFlightNamespace: Namespace.ID? = nil,
+        sendFlightID: UUID? = nil,
         onTap: @escaping () -> Void
     ) {
         self.urls = urls
@@ -105,6 +141,8 @@ public struct ImageStackBubble: View {
         self.namespace = namespace
         self.geometryID = geometryID
         self.isHeroSource = isHeroSource
+        self.sendFlightNamespace = sendFlightNamespace
+        self.sendFlightID = sendFlightID
         self.onTap = onTap
     }
 
@@ -137,6 +175,11 @@ public struct ImageStackBubble: View {
                 RoundedRectangle(cornerRadius: Self.cardCornerRadius, style: .continuous)
                     .strokeBorder(Color(.separator).opacity(0.3), lineWidth: 0.5)
             }
+            .modifier(OptionalMatchedGeometry(
+                id: sendFlightID?.uuidString,
+                namespace: sendFlightNamespace,
+                properties: [.position, .size]
+            ))
             .matchedGeometryEffect(id: geometryID, in: namespace, isSource: isHeroSource)
             .opacity(isHeroSource ? 1 : 0)
     }
@@ -153,6 +196,11 @@ public struct ImageStackBubble: View {
                 RoundedRectangle(cornerRadius: Self.cardCornerRadius, style: .continuous)
                     .strokeBorder(Color(.separator).opacity(0.3), lineWidth: 0.5)
             }
+            .modifier(OptionalMatchedGeometry(
+                id: sendFlightID.map { "\($0.uuidString)-card-\(depth)" },
+                namespace: sendFlightNamespace,
+                properties: [.position, .size]
+            ))
             .scaleEffect(scale, anchor: .bottom)
             .rotationEffect(.degrees(angle), anchor: .bottom)
     }

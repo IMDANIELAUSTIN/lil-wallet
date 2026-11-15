@@ -156,6 +156,7 @@ public struct VoiceMemoPlayerView: View {
     public let url: URL
     public var isSender: Bool = false
     public var tint: Color? = nil
+    public var isScheduled: Bool = false
     public var onLongPress: (() -> Void)? = nil
 
     @State private var player: AVAudioPlayer?
@@ -179,10 +180,11 @@ public struct VoiceMemoPlayerView: View {
         (bubbleHeight - playControlDiameter) / 2
     }
 
-    public init(url: URL, isSender: Bool = false, tint: Color? = nil, onLongPress: (() -> Void)? = nil) {
+    public init(url: URL, isSender: Bool = false, tint: Color? = nil, isScheduled: Bool = false, onLongPress: (() -> Void)? = nil) {
         self.url = url
         self.isSender = isSender
         self.tint = tint
+        self.isScheduled = isScheduled
         self.onLongPress = onLongPress
         if let cached = WaveformAnalyzer.cachedBars(for: url) {
             _bars = State(initialValue: cached)
@@ -220,14 +222,24 @@ public struct VoiceMemoPlayerView: View {
     }
 
     private var playButton: some View {
-        Button(action: toggle) {
+        let activeTint = tint ?? OrchardDesign.Colors.imessageBlue
+        let circleFill: Color = {
+            if !isSender { return activeTint }
+            return isScheduled ? activeTint.opacity(0.15) : OrchardDesign.Colors.offWhite
+        }()
+        let iconColor: Color = {
+            if !isSender { return OrchardDesign.Colors.offWhite }
+            return activeTint
+        }()
+
+        return Button(action: toggle) {
             ZStack {
                 Circle()
-                    .fill(isSender ? OrchardDesign.Colors.offWhite : (tint ?? OrchardDesign.Colors.imessageBlue))
+                    .fill(circleFill)
                     .frame(width: Self.playControlDiameter, height: Self.playControlDiameter)
                 Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(isSender ? (tint ?? OrchardDesign.Colors.imessageBlue) : OrchardDesign.Colors.offWhite)
+                    .foregroundStyle(iconColor)
                     .offset(x: isPlaying ? 0 : 1)
             }
             .scaleEffect(isPlaying ? 1.06 : 1.0)
@@ -241,8 +253,14 @@ public struct VoiceMemoPlayerView: View {
             let played = duration > 0 ? progress / duration : 0
             let count = max(bars.count, 1)
             let barW = max((proxy.size.width - CGFloat(count - 1) * Self.waveformBarSpacing) / CGFloat(count), 1.5)
-            let playedColor = isSender ? OrchardDesign.Colors.offWhite : (tint ?? OrchardDesign.Colors.imessageBlue)
-            let unplayedColor = isSender ? OrchardDesign.Colors.offWhite.opacity(0.35) : Color.secondary.opacity(0.30)
+            let activeTint = tint ?? OrchardDesign.Colors.imessageBlue
+            let playedColor: Color = (isSender && !isScheduled) ? OrchardDesign.Colors.offWhite : activeTint
+            let unplayedColor: Color = {
+                if isSender {
+                    return isScheduled ? activeTint.opacity(0.35) : OrchardDesign.Colors.offWhite.opacity(0.35)
+                }
+                return Color.secondary.opacity(0.30)
+            }()
 
             HStack(alignment: .center, spacing: Self.waveformBarSpacing) {
                 ForEach(Array(bars.enumerated()), id: \.offset) { index, height in
@@ -270,24 +288,31 @@ public struct VoiceMemoPlayerView: View {
     }
 
     private var trailingControlStack: some View {
-        VStack(alignment: .center, spacing: 1) {
+        let activeTint = tint ?? OrchardDesign.Colors.imessageBlue
+        let badgeBackground: Color = {
+            if !isSender { return Color(.tertiarySystemFill) }
+            return isScheduled ? activeTint.opacity(0.15) : OrchardDesign.Colors.offWhite.opacity(0.28)
+        }()
+        let timerColor: Color = {
+            if !isSender { return Color.secondary }
+            return isScheduled ? activeTint : OrchardDesign.Colors.offWhite
+        }()
+
+        return VStack(alignment: .center, spacing: 1) {
             Button(action: cycleSpeed) {
                 Text(String(format: "%gx", playbackSpeed))
                     .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle(isSender ? (tint ?? OrchardDesign.Colors.imessageBlue) : Color.primary.opacity(0.8))
+                    .foregroundStyle(isSender ? activeTint : Color.primary.opacity(0.8))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(
-                        isSender ? OrchardDesign.Colors.offWhite.opacity(0.28) : Color(.tertiarySystemFill),
-                        in: Capsule()
-                    )
+                    .background(badgeBackground, in: Capsule())
             }
             .buttonStyle(.plain)
 
             let secs = Int(max(0, progress > 0 ? progress : duration))
             Text(String(format: "%02d:%02d", secs / 60, secs % 60))
                 .font(.system(size: 9.5, weight: .semibold).monospacedDigit())
-                .foregroundStyle(isSender ? OrchardDesign.Colors.offWhite : Color.secondary)
+                .foregroundStyle(timerColor)
         }
     }
 

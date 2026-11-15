@@ -161,6 +161,109 @@ public struct ScheduleTimePickerSheet: View {
     }
 }
 
+// MARK: - Bubble Send Transition Helpers
+
+/// Applies the `MBTChatView` vertical settle push (`keyframeAnimator` driven by
+/// `isVisible` flipping from `false` to `true`) on newly sent bubbles.
+private struct SendBubbleBounceModifier: ViewModifier {
+    let isVisible: Bool
+    let offsetAmplitude: CGFloat
+    let reduceMotion: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .compositingGroup()
+            .keyframeAnimator(initialValue: CGFloat.zero, trigger: isVisible) { view, progress in
+                view.offset(y: reduceMotion ? 0 : offsetAmplitude * progress)
+            } keyframes: { _ in
+                CubicKeyframe(1, duration: 0.15)
+                CubicKeyframe(0, duration: 0.15)
+            }
+    }
+}
+
+/// Lightweight visual clone of a sent `VoiceMemoPlayerView` capsule used for
+/// the Frame-0 composer transition source without allocating an `AVAudioPlayer`.
+private struct VoiceBubbleTransitionPreview: View {
+    let url: URL
+    let tint: Color
+    let duration: TimeInterval
+    var isScheduled: Bool = false
+
+    private static let barCount = 36
+    private static let playControlDiameter: CGFloat = 28
+    private static let waveformHeight: CGFloat = 24
+    private static let waveformBarSpacing: CGFloat = 2.0
+
+    private var formattedDuration: String {
+        let secs = max(0, Int(duration.rounded()))
+        return String(format: "%02d:%02d", secs / 60, secs % 60)
+    }
+
+    var body: some View {
+        let bars = WaveformAnalyzer.cachedBars(for: url) ?? WaveformAnalyzer.bars(for: url, count: Self.barCount)
+        HStack(spacing: 0) {
+            ZStack {
+                Circle()
+                    .fill(isScheduled ? tint.opacity(0.15) : OrchardDesign.Colors.offWhite)
+                    .frame(width: Self.playControlDiameter, height: Self.playControlDiameter)
+                Image(systemName: "play.fill")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(tint)
+                    .offset(x: 1)
+            }
+            .padding(.leading, 5)
+
+            GeometryReader { proxy in
+                let count = max(bars.count, 1)
+                let barW = max(
+                    (proxy.size.width - CGFloat(count - 1) * Self.waveformBarSpacing) / CGFloat(count),
+                    1.5
+                )
+                let barColor = isScheduled ? tint.opacity(0.35) : OrchardDesign.Colors.offWhite.opacity(0.35)
+                HStack(alignment: .center, spacing: Self.waveformBarSpacing) {
+                    ForEach(Array(bars.enumerated()), id: \.offset) { _, height in
+                        Capsule()
+                            .fill(barColor)
+                            .frame(width: barW, height: max(3, height * proxy.size.height))
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            }
+            .frame(minWidth: 120, maxWidth: .infinity)
+            .frame(height: Self.waveformHeight)
+            .padding(.horizontal, 8)
+
+            VStack(alignment: .center, spacing: 1) {
+                Text("1x")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(tint)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        isScheduled ? tint.opacity(0.15) : OrchardDesign.Colors.offWhite.opacity(0.28),
+                        in: Capsule()
+                    )
+                Text(formattedDuration)
+                    .font(.system(size: 9.5, weight: .semibold).monospacedDigit())
+                    .foregroundStyle(isScheduled ? tint : OrchardDesign.Colors.offWhite)
+            }
+            .padding(.trailing, 10)
+        }
+        .padding(.vertical, 5)
+        .background(
+            isScheduled ? AnyShapeStyle(Color.clear) : AnyShapeStyle(tint),
+            in: Capsule()
+        )
+        .overlay {
+            if isScheduled {
+                Capsule()
+                    .stroke(tint, style: StrokeStyle(lineWidth: 1.75, lineCap: .round, lineJoin: .round, dash: [5, 5]))
+            }
+        }
+    }
+}
+
 // MARK: - Main Threaded Chat View (ChatDetailView)
 
 public struct ChatDetailView: View {
@@ -169,13 +272,25 @@ public struct ChatDetailView: View {
     public var onStartCall: ((Bool) -> Void)? = nil
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var messageText = ""
     @State private var pendingAttachments: [PendingAttachment] = []
     @State private var showingMediaPicker = false
     @State private var attachmentNotice: String?
     @State private var viewerImage: IdentifiableURL?
     @Namespace private var mediaNamespace
+    @Namespace private var bubbleNamespace
     @FocusState private var isComposerFocused: Bool
+
+    // Composer-to-Transcript Send Transition State
+    @State private var messageFieldSize: CGSize = .zero
+    @State private var activeTransitionIDs: Set<UUID> = []
+    @State private var activeTextTransitionID: UUID?
+    @State private var activeTextSnapshot = ""
+    @State private var activeVoiceTransitionID: UUID?
+    @State private var transitioningFitByID: [UUID: Bool] = [:]
+    @State private var trayFlightIDByAttachmentID: [UUID: String] = [:]
+    @State private var scrollToBottomTrigger = 0
 
     // Edit, Retry & Tapback Overlay State
     @State private var editingMessage: ChatMessage?
@@ -262,7 +377,14 @@ public struct ChatDetailView: View {
             .scrollEdgeEffectHidden(true, for: .bottom)
             .scrollDismissesKeyboard(.interactively)
             .onChange(of: thread.messages.count) { _, _ in
-                withAnimation(OrchardMotion.standard) {
+                if activeTransitionIDs.isEmpty {
+                    withAnimation(OrchardMotion.standard) {
+                        proxy.scrollTo(bottomAnchorID, anchor: .bottom)
+                    }
+                }
+            }
+            .onChange(of: scrollToBottomTrigger) { _, _ in
+                withAnimation(bubbleTransitionAnimation) {
                     proxy.scrollTo(bottomAnchorID, anchor: .bottom)
                 }
             }
@@ -283,6 +405,7 @@ public struct ChatDetailView: View {
 
                 if !pendingAttachments.filter({ $0.kind != .voiceMemo }).isEmpty {
                     attachmentTray
+                        .transition(trayFlightIDByAttachmentID.isEmpty ? .opacity : .identity)
                 }
 
                 composerInputBar
@@ -307,9 +430,9 @@ public struct ChatDetailView: View {
                     }
                     .ignoresSafeArea(edges: .bottom)
             }
-            .animation(.spring(response: 0.36, dampingFraction: 0.8), value: pendingAttachments.count)
-            .animation(.spring(response: 0.36, dampingFraction: 0.8), value: messageText.isEmpty)
-            .animation(.spring(response: 0.36, dampingFraction: 0.8), value: scheduledSendDate)
+            .animation(OrchardMotion.snappy, value: pendingAttachments.count)
+            .animation(OrchardMotion.snappy, value: canSend)
+            .animation(OrchardMotion.snappy, value: scheduledSendDate)
         }
         .sheet(isPresented: $showingSchedulePicker) {
             ScheduleTimePickerSheet(
@@ -463,15 +586,19 @@ public struct ChatDetailView: View {
 
     @ViewBuilder
     private func messageRow(_ message: ChatMessage) -> some View {
+        let isVisible = !activeTransitionIDs.contains(message.id)
+        let isTransitionTarget = transitioningFitByID[message.id] != nil
+        let isFit = transitioningFitByID[message.id] ?? false
+
         VStack(spacing: 2) {
-            if let timestamp = message.timestampText {
+            if isVisible, let timestamp = message.timestampText {
                 Text(timestamp)
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(.secondary)
                     .padding(.vertical, OrchardDesign.Spacing.nano)
             }
 
-            if let dividerLabel = transportDividerLabel(for: message) {
+            if isVisible, let dividerLabel = transportDividerLabel(for: message) {
                 HStack(spacing: 4) {
                     Image(systemName: dividerLabel == "Bluetooth" ? "antenna.radiowaves.left.and.right" : "lock.fill")
                     Text(dividerLabel)
@@ -487,54 +614,69 @@ public struct ChatDetailView: View {
                     if message.mediaType != nil {
                         if isBatchLeader(message) {
                             VStack(alignment: .trailing, spacing: 2) {
-                                mediaBubbleContent(for: message, isSender: true)
-                                deliveryIndicator(for: message)
+                                ZStack {
+                                    if isVisible {
+                                        mediaBubbleContent(for: message, isSender: true)
+                                    }
+                                }
+                                .modifier(SendBubbleBounceModifier(
+                                    isVisible: isVisible,
+                                    offsetAmplitude: max(messageFieldSize.height, 44) * 0.55,
+                                    reduceMotion: reduceMotion
+                                ))
+                                if isVisible {
+                                    if let fireDate = message.scheduledDeliveryDate {
+                                        Label(Self.scheduledPillFormatter.string(from: fireDate), systemImage: "clock.badge")
+                                            .font(.caption2.weight(.medium))
+                                            .foregroundStyle(scheduledAccent)
+                                    } else {
+                                        deliveryIndicator(for: message)
+                                    }
+                                }
                             }
                         }
                     } else {
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text(message.text)
-                                .font(.body)
-                                .italic(message.isDeleted)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(.horizontal, bubbleHorizontalPadding)
-                                .padding(.vertical, bubbleVerticalPadding)
-                                .background(
-                                    message.scheduledDeliveryDate != nil
-                                        ? AnyShapeStyle(Color.clear)
-                                        : (message.isDeleted
-                                            ? AnyShapeStyle(Color(.secondarySystemFill))
-                                            : AnyShapeStyle(sentBubbleColor(for: message))),
-                                    in: .rect(cornerRadius: bubbleCornerRadius, style: .continuous)
-                                )
-                                .overlay {
-                                    if message.scheduledDeliveryDate != nil {
-                                        RoundedRectangle(cornerRadius: bubbleCornerRadius, style: .continuous)
-                                            .stroke(scheduledAccent, style: Self.scheduledDashStyle)
-                                    }
+                            ZStack {
+                                if isVisible {
+                                    sentTextBubble(for: message, isFit: isFit)
+                                        .matchedGeometryEffect(
+                                            id: message.id.uuidString,
+                                            in: bubbleNamespace,
+                                            properties: isFit ? [.position, .size] : [.position]
+                                        )
                                 }
-                                .foregroundStyle(
-                                    message.scheduledDeliveryDate != nil
-                                        ? AnyShapeStyle(Color.primary)
-                                        : (message.isDeleted ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.white))
-                                )
-                                .frame(maxWidth: 280, alignment: .trailing)
+                            }
+                            .fixedSize(horizontal: isFit ? isVisible : false, vertical: true)
+                            .modifier(SendBubbleBounceModifier(
+                                isVisible: isVisible,
+                                offsetAmplitude: max(messageFieldSize.height, 38) * 0.55,
+                                reduceMotion: reduceMotion
+                            ))
+                            .frame(
+                                maxWidth: isTransitionTarget && !isFit && messageFieldSize.width > 0
+                                    ? min(280, messageFieldSize.width)
+                                    : 280,
+                                alignment: .trailing
+                            )
 
-                            if !message.isDeleted, let link = ChatLinkDetector.firstLink(in: message.text) {
-                                ChatLinkPreview(url: link)
-                                    .frame(maxWidth: 280)
-                            }
-                            if message.isEdited && !message.isDeleted {
-                                Text("Edited")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
-                            if let fireDate = message.scheduledDeliveryDate {
-                                Label(Self.scheduledPillFormatter.string(from: fireDate), systemImage: "clock.badge")
-                                    .font(.caption2.weight(.medium))
-                                    .foregroundStyle(scheduledAccent)
-                            } else {
-                                deliveryIndicator(for: message)
+                            if isVisible {
+                                if !message.isDeleted, let link = ChatLinkDetector.firstLink(in: message.text) {
+                                    ChatLinkPreview(url: link)
+                                        .frame(maxWidth: 280)
+                                }
+                                if message.isEdited && !message.isDeleted {
+                                    Text("Edited")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                if let fireDate = message.scheduledDeliveryDate {
+                                    Label(Self.scheduledPillFormatter.string(from: fireDate), systemImage: "clock.badge")
+                                        .font(.caption2.weight(.medium))
+                                        .foregroundStyle(scheduledAccent)
+                                } else {
+                                    deliveryIndicator(for: message)
+                                }
                             }
                         }
                     }
@@ -552,7 +694,7 @@ public struct ChatDetailView: View {
         }
         .id(message.id)
         .overlay(alignment: message.isSender ? .bottomLeading : .bottomTrailing) {
-            if !message.reactions.isEmpty {
+            if isVisible, !message.reactions.isEmpty {
                 reactionPill(for: message)
                     .offset(y: 10)
             }
@@ -587,6 +729,77 @@ public struct ChatDetailView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func sentTextBubble(for message: ChatMessage, isFit: Bool) -> some View {
+        outgoingTextBubblePill(
+            text: message.text,
+            tint: sentBubbleColor(for: message),
+            isScheduled: message.scheduledDeliveryDate != nil,
+            isDeleted: message.isDeleted,
+            isFit: isFit
+        )
+    }
+
+    @ViewBuilder
+    private func outgoingTextBubblePill(
+        text: String,
+        tint: Color,
+        isScheduled: Bool,
+        isDeleted: Bool = false,
+        isFit: Bool,
+        lineLimit: Int? = nil
+    ) -> some View {
+        Text(text)
+            .font(.body)
+            .italic(isDeleted)
+            .lineLimit(lineLimit)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, bubbleHorizontalPadding)
+            .padding(.vertical, bubbleVerticalPadding)
+            .frame(maxWidth: isFit ? .infinity : nil, alignment: .leading)
+            .background(
+                isScheduled
+                    ? AnyShapeStyle(Color.clear)
+                    : (isDeleted
+                        ? AnyShapeStyle(Color(.secondarySystemFill))
+                        : AnyShapeStyle(tint)),
+                in: .rect(cornerRadius: bubbleCornerRadius, style: .continuous)
+            )
+            .overlay {
+                if isScheduled {
+                    RoundedRectangle(cornerRadius: bubbleCornerRadius, style: .continuous)
+                        .stroke(scheduledAccent, style: Self.scheduledDashStyle)
+                }
+            }
+            .foregroundStyle(
+                isScheduled
+                    ? AnyShapeStyle(Color.primary)
+                    : (isDeleted ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.white))
+            )
+    }
+
+    private func temporaryTextTransitionSource(for transitionID: UUID) -> some View {
+        let isFit = transitioningFitByID[transitionID] ?? false
+        let message = thread.messages.first(where: { $0.id == transitionID })
+        let sourceText = activeTextSnapshot.isEmpty ? (message?.text ?? messageText) : activeTextSnapshot
+        let tint = message.map(sentBubbleColor(for:)) ?? defaultOutgoingBubbleColor
+        let isScheduled = (message?.scheduledDeliveryDate ?? scheduledSendDate) != nil
+
+        return outgoingTextBubblePill(
+            text: sourceText,
+            tint: tint,
+            isScheduled: isScheduled,
+            isFit: isFit,
+            lineLimit: 6
+        )
+        .matchedGeometryEffect(
+            id: transitionID.uuidString,
+            in: bubbleNamespace,
+            properties: isFit ? [.position, .size] : [.position]
+        )
+        .allowsHitTesting(false)
     }
 
     @ViewBuilder
@@ -659,6 +872,7 @@ public struct ChatDetailView: View {
     private func mediaBubbleContent(for message: ChatMessage, isSender: Bool) -> some View {
         let batch = batchMessages(for: message)
         let imageURLs = batch.compactMap { isImageMessage($0) ? $0.mediaFileURL : nil }
+        let isScheduled = isSender && message.scheduledDeliveryDate != nil
 
         if !imageURLs.isEmpty {
             let heroID = message.id.uuidString
@@ -667,7 +881,9 @@ public struct ChatDetailView: View {
                 isSender: isSender,
                 namespace: mediaNamespace,
                 geometryID: heroID,
-                isHeroSource: viewerImage?.id.uuidString != heroID
+                isHeroSource: viewerImage?.id.uuidString != heroID,
+                sendFlightNamespace: isSender ? bubbleNamespace : nil,
+                sendFlightID: isSender ? message.id : nil
             ) {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                     viewerImage = IdentifiableURL(id: message.id, urls: imageURLs, startIndex: 0)
@@ -675,8 +891,27 @@ public struct ChatDetailView: View {
             }
         } else if isVoiceMessage(message), let url = message.mediaFileURL {
             let bubbleColor = isSender ? sentBubbleColor(for: message) : Color(.secondarySystemFill)
-            VoiceMemoPlayerView(url: url, isSender: isSender, tint: bubbleColor)
-                .background(bubbleColor, in: Capsule())
+            VoiceMemoPlayerView(
+                url: url,
+                isSender: isSender,
+                tint: isScheduled ? scheduledAccent : bubbleColor,
+                isScheduled: isScheduled
+            )
+                .background(
+                    isScheduled ? AnyShapeStyle(Color.clear) : AnyShapeStyle(bubbleColor),
+                    in: Capsule()
+                )
+                .overlay {
+                    if isScheduled {
+                        Capsule()
+                            .stroke(scheduledAccent, style: Self.scheduledDashStyle)
+                    }
+                }
+                .modifier(OptionalMatchedGeometry(
+                    id: isSender ? message.id.uuidString : nil,
+                    namespace: bubbleNamespace,
+                    properties: [.position, .size]
+                ))
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 ZStack {
@@ -697,10 +932,23 @@ public struct ChatDetailView: View {
             }
             .padding(10)
             .background(.quaternary, in: .rect(cornerRadius: bubbleCornerRadius, style: .continuous))
+            .modifier(OptionalMatchedGeometry(
+                id: isSender ? message.id.uuidString : nil,
+                namespace: bubbleNamespace,
+                properties: [.position, .size]
+            ))
         }
     }
 
     // MARK: - Transport Colors & Delivery Receipts
+
+    private var defaultOutgoingBubbleColor: Color {
+        thread.isMeshOnly ? OrchardDesign.Colors.bluetoothRed : OrchardDesign.Colors.imessageBlue
+    }
+
+    private var bubbleTransitionAnimation: Animation {
+        .interpolatingSpring(duration: 0.3, bounce: 0, initialVelocity: 0)
+    }
 
     private func resolvedTransport(for message: ChatMessage) -> MessageTransport {
         if let explicit = message.transport { return explicit }
@@ -739,7 +987,9 @@ public struct ChatDetailView: View {
     }
 
     private var lastSentMessageID: UUID? {
-        thread.messages.last(where: { $0.isSender && $0.scheduledDeliveryDate == nil })?.id
+        thread.messages.last(where: {
+            $0.isSender && $0.scheduledDeliveryDate == nil && !activeTransitionIDs.contains($0.id)
+        })?.id
     }
 
     @ViewBuilder
@@ -997,24 +1247,42 @@ public struct ChatDetailView: View {
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
                         )
+                        .modifier(OptionalMatchedGeometry(
+                            id: trayFlightIDByAttachmentID[attachment.id],
+                            namespace: bubbleNamespace,
+                            properties: [.position, .size]
+                        ))
                         .padding(.top, 6)
                         .padding(.trailing, 6)
 
-                        Button {
-                            withAnimation(.spring(response: 0.36, dampingFraction: 0.8)) {
-                                pendingAttachments.removeAll { $0.id == attachment.id }
+                        if trayFlightIDByAttachmentID.isEmpty {
+                            Button {
+                                withAnimation(.spring(response: 0.36, dampingFraction: 0.8)) {
+                                    pendingAttachments.removeAll { $0.id == attachment.id }
+                                }
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 18))
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, Color.black.opacity(0.65))
+                                    .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
                             }
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 18))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, Color.black.opacity(0.65))
-                                .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                     .frame(width: 62, height: 62)
                     .zIndex(Double(index))
+                    .transition(
+                        trayFlightIDByAttachmentID.isEmpty
+                            ? .asymmetric(
+                                insertion: .scale(scale: 0.8, anchor: .center)
+                                    .combined(with: .opacity)
+                                    .combined(with: .offset(x: 12)),
+                                removal: .scale(scale: 0.8, anchor: .center)
+                                    .combined(with: .opacity)
+                            )
+                            : .identity
+                    )
                 }
             }
             .padding(.horizontal, 2)
@@ -1030,6 +1298,7 @@ public struct ChatDetailView: View {
                 inlineRecordingBar
             } else if let voiceMemoURL = stagedVoiceMemoURL {
                 stagedVoiceMemoBar(url: voiceMemoURL)
+                    .transition(activeVoiceTransitionID == nil ? .opacity : .identity)
             } else {
                 Menu {
                     Button {
@@ -1077,12 +1346,25 @@ public struct ChatDetailView: View {
                         text: $messageText,
                         axis: .vertical
                     )
+                    .font(.body)
                     .focused($isComposerFocused)
                     .lineLimit(1...6)
                     .submitLabel(.send)
-                    .onSubmit { sendComposed() }
+                    .onSubmit {
+                        guard activeTransitionIDs.isEmpty else { return }
+                        sendComposed()
+                    }
+                    .opacity(activeTextTransitionID == nil ? 1 : 0)
                     .padding(.horizontal, bubbleHorizontalPadding)
                     .padding(.vertical, bubbleVerticalPadding)
+                    .onGeometryChange(for: CGSize.self) { $0.size } action: { newSize in
+                        messageFieldSize = newSize
+                    }
+                    .overlay(alignment: .topLeading) {
+                        if let textTransitionID = activeTextTransitionID {
+                            temporaryTextTransitionSource(for: textTransitionID)
+                        }
+                    }
 
                     if !canSend {
                         Button {
@@ -1127,7 +1409,10 @@ public struct ChatDetailView: View {
                 .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
 
                 if canSend {
-                    Button(action: sendComposed) {
+                    Button {
+                        guard activeTransitionIDs.isEmpty else { return }
+                        sendComposed()
+                    } label: {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 30))
                             .foregroundStyle(OrchardDesign.Colors.imessageBlue)
@@ -1137,13 +1422,14 @@ public struct ChatDetailView: View {
                             )
                             .contentShape(Circle())
                     }
+                    .disabled(!activeTransitionIDs.isEmpty)
                     .transition(.scale.combined(with: .opacity))
                 }
             }
         }
-        .animation(.spring(duration: 0.25, bounce: 0), value: messageText.isEmpty)
-        .animation(.spring(duration: 0.25, bounce: 0), value: isRecordingInline)
-        .animation(.spring(duration: 0.25, bounce: 0), value: stagedVoiceMemoURL)
+        .animation(OrchardMotion.snappy, value: canSend)
+        .animation(OrchardMotion.snappy, value: isRecordingInline)
+        .animation(OrchardMotion.snappy, value: stagedVoiceMemoURL)
     }
 
     // MARK: - Inline Voice Recording & Staged Review Bars
@@ -1279,23 +1565,8 @@ public struct ChatDetailView: View {
                     .background(Capsule().fill(colorScheme == .dark ? Color.white.opacity(0.18) : Color.primary.opacity(0.08)))
 
                 Button {
-                    stopStagedVoiceMemoPlayback()
-                    let msg = ChatMessage(
-                        text: "Voice Memo",
-                        isSender: true,
-                        mediaType: "Voice Memo",
-                        mediaFileURL: url,
-                        wasMeshSend: thread.isMeshOnly,
-                        transport: thread.isMeshOnly ? .bluetooth : .p2p,
-                        receiptStatus: "sent"
-                    )
-                    thread.messages.append(msg)
-                    withAnimation(OrchardMotion.snappy) {
-                        stagedVoiceMemoURL = nil
-                        stagedVoiceMemoDuration = 0
-                        stagedPlaybackProgress = 0
-                    }
-                    OrchardMotion.HapticStyle.light.fire()
+                    guard activeTransitionIDs.isEmpty else { return }
+                    sendStagedVoiceMemo(url: url)
                 } label: {
                     ZStack {
                         Circle()
@@ -1306,6 +1577,7 @@ public struct ChatDetailView: View {
                             .foregroundStyle(.white)
                     }
                 }
+                .disabled(!activeTransitionIDs.isEmpty)
                 .buttonStyle(.plain)
                 .accessibilityLabel("Send voice memo")
             }
@@ -1317,6 +1589,22 @@ public struct ChatDetailView: View {
             .glassEffect(.clear, in: Capsule())
             .overlay(Capsule().strokeBorder(colorScheme == .dark ? Color.white.opacity(0.18) : Color.primary.opacity(0.12), lineWidth: 0.5))
             .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+            .opacity(activeVoiceTransitionID == nil ? 1 : 0)
+            .overlay {
+                if let voiceTransitionID = activeVoiceTransitionID {
+                    VoiceBubbleTransitionPreview(
+                        url: url,
+                        tint: voiceBubbleTint(for: voiceTransitionID),
+                        duration: stagedVoiceMemoDuration,
+                        isScheduled: scheduledSendDate != nil
+                    )
+                    .matchedGeometryEffect(
+                        id: voiceTransitionID.uuidString,
+                        in: bubbleNamespace,
+                        properties: [.position, .size]
+                    )
+                }
+            }
         }
         .onDisappear {
             stopStagedVoiceMemoPlayback()
@@ -1359,13 +1647,161 @@ public struct ChatDetailView: View {
         stagedProgressTask = nil
     }
 
+    private func voiceBubbleTint(for messageID: UUID) -> Color {
+        if let message = thread.messages.first(where: { $0.id == messageID }) {
+            return message.scheduledDeliveryDate != nil ? scheduledAccent : sentBubbleColor(for: message)
+        }
+        return scheduledSendDate != nil ? scheduledAccent : defaultOutgoingBubbleColor
+    }
+
+    private func isTextSingleLineFit(_ text: String) -> Bool {
+        guard !text.contains("\n") else { return false }
+        let fieldWidth = messageFieldSize.width > 0 ? messageFieldSize.width : 280
+        let availableTextWidth = max(0, min(280, fieldWidth) - bubbleHorizontalPadding * 2 - 4)
+        #if canImport(UIKit)
+        let width = (text as NSString).size(withAttributes: [
+            .font: UIFont.preferredFont(forTextStyle: .body)
+        ]).width
+        return width < availableTextWidth
+        #else
+        return false
+        #endif
+    }
+
+    private func runSendTransition(
+        transitionIDs: Set<UUID>,
+        fitMap: [UUID: Bool],
+        textTransitionID: UUID?,
+        voiceTransitionID: UUID?,
+        trayFlights: [UUID: String],
+        clearComposer: @escaping @MainActor () -> Void
+    ) {
+        if reduceMotion || transitionIDs.isEmpty {
+            withAnimation(OrchardMotion.snappy) {
+                clearComposer()
+                activeTextSnapshot = ""
+                scrollToBottomTrigger += 1
+            }
+            return
+        }
+
+        transitioningFitByID.merge(fitMap) { _, new in new }
+        activeTextTransitionID = textTransitionID
+        activeVoiceTransitionID = voiceTransitionID
+        trayFlightIDByAttachmentID = trayFlights
+        activeTransitionIDs.formUnion(transitionIDs)
+
+        let batchIDs = transitionIDs
+        let capturedVoiceID = voiceTransitionID
+        let capturedTrayIDs = Array(trayFlights.keys)
+        DispatchQueue.main.async {
+            withAnimation(bubbleTransitionAnimation, completionCriteria: .removed) {
+                clearComposer()
+                activeTransitionIDs.subtract(batchIDs)
+                activeTextTransitionID = nil
+                scrollToBottomTrigger += 1
+            } completion: {
+                if activeTextTransitionID == nil {
+                    activeTextSnapshot = ""
+                }
+                if activeVoiceTransitionID == capturedVoiceID {
+                    activeVoiceTransitionID = nil
+                }
+                for key in capturedTrayIDs {
+                    trayFlightIDByAttachmentID.removeValue(forKey: key)
+                }
+                for id in batchIDs {
+                    transitioningFitByID.removeValue(forKey: id)
+                }
+            }
+        }
+    }
+
+    private func sendStagedVoiceMemo(url: URL) {
+        guard activeTransitionIDs.isEmpty else { return }
+        stopStagedVoiceMemoPlayback()
+
+        let voiceMessageID = UUID()
+        let isScheduled = scheduledSendDate != nil
+        let msg = ChatMessage(
+            id: voiceMessageID,
+            text: "Voice Memo",
+            isSender: true,
+            mediaType: "Voice Memo",
+            mediaFileURL: url,
+            wasMeshSend: thread.isMeshOnly,
+            transport: thread.isMeshOnly ? .bluetooth : .p2p,
+            scheduledDeliveryDate: scheduledSendDate,
+            scheduledRecordID: isScheduled ? UUID() : nil,
+            receiptStatus: isScheduled ? nil : "sent"
+        )
+        thread.messages.append(msg)
+        thread.lastMessage = "Voice Memo"
+        thread.timestamp = "Now"
+
+        runSendTransition(
+            transitionIDs: [voiceMessageID],
+            fitMap: [:],
+            textTransitionID: nil,
+            voiceTransitionID: voiceMessageID,
+            trayFlights: [:]
+        ) {
+            stagedVoiceMemoURL = nil
+            stagedVoiceMemoDuration = 0
+            stagedPlaybackProgress = 0
+            scheduledSendDate = nil
+        }
+        OrchardMotion.HapticStyle.light.fire()
+    }
+
     private func sendComposed() {
+        guard activeTransitionIDs.isEmpty else { return }
+        if let voiceMemoURL = stagedVoiceMemoURL {
+            sendStagedVoiceMemo(url: voiceMemoURL)
+            return
+        }
+
         let trimmed = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !pendingAttachments.isEmpty {
+        guard !trimmed.isEmpty || !pendingAttachments.isEmpty else { return }
+
+        var transitionIDs: Set<UUID> = []
+        var fitMap: [UUID: Bool] = [:]
+        var textTransitionID: UUID?
+        var trayFlights: [UUID: String] = [:]
+        let isScheduled = scheduledSendDate != nil
+        let sharedScheduleRecordID = isScheduled ? UUID() : nil
+        let stagedAttachments = pendingAttachments
+
+        if !stagedAttachments.isEmpty {
             let batchID = UUID()
-            for attachment in pendingAttachments {
+            let imageLeadID = UUID()
+            var imageIndex = 0
+
+            for attachment in stagedAttachments {
                 if let url = attachment.fileURL {
+                    let isImage = attachment.kind == .image
+                    let msgID: UUID = (isImage && imageIndex == 0) ? imageLeadID : UUID()
+
+                    if isImage {
+                        if let thumb = attachment.thumbnail {
+                            DiskImageThumbnail.prewarmPreview(thumb, for: url)
+                        }
+                        if imageIndex < 3 {
+                            trayFlights[attachment.id] = imageIndex == 0
+                                ? imageLeadID.uuidString
+                                : "\(imageLeadID.uuidString)-card-\(imageIndex)"
+                        }
+                        if imageIndex == 0 {
+                            transitionIDs.insert(imageLeadID)
+                        }
+                        imageIndex += 1
+                    } else {
+                        transitionIDs.insert(msgID)
+                        trayFlights[attachment.id] = msgID.uuidString
+                    }
+
                     let msg = ChatMessage(
+                        id: msgID,
                         text: trimmed.isEmpty ? "Photo" : trimmed,
                         isSender: true,
                         mediaType: "Photo",
@@ -1373,31 +1809,50 @@ public struct ChatDetailView: View {
                         wasMeshSend: thread.isMeshOnly,
                         transport: thread.isMeshOnly ? .bluetooth : .p2p,
                         sendBatchID: batchID,
-                        receiptStatus: "sent"
+                        scheduledDeliveryDate: scheduledSendDate,
+                        scheduledRecordID: sharedScheduleRecordID,
+                        receiptStatus: isScheduled ? nil : "sent"
                     )
                     thread.messages.append(msg)
+                    thread.lastMessage = trimmed.isEmpty ? "Photo" : trimmed
+                    thread.timestamp = "Now"
                 }
             }
-            pendingAttachments.removeAll()
         }
 
         if !trimmed.isEmpty {
+            let textMsgID = UUID()
+            let isFit = isTextSingleLineFit(trimmed)
+            activeTextSnapshot = trimmed
             let msg = ChatMessage(
+                id: textMsgID,
                 text: trimmed,
                 isSender: true,
                 wasMeshSend: thread.isMeshOnly,
                 transport: thread.isMeshOnly ? .bluetooth : .p2p,
                 scheduledDeliveryDate: scheduledSendDate,
-                scheduledRecordID: scheduledSendDate != nil ? UUID() : nil,
-                receiptStatus: scheduledSendDate == nil ? "sent" : nil
+                scheduledRecordID: sharedScheduleRecordID,
+                receiptStatus: isScheduled ? nil : "sent"
             )
             thread.messages.append(msg)
             thread.lastMessage = trimmed
             thread.timestamp = "Now"
+            transitionIDs.insert(textMsgID)
+            fitMap[textMsgID] = isFit
+            textTransitionID = textMsgID
         }
 
-        messageText = ""
-        scheduledSendDate = nil
+        runSendTransition(
+            transitionIDs: transitionIDs,
+            fitMap: fitMap,
+            textTransitionID: textTransitionID,
+            voiceTransitionID: nil,
+            trayFlights: trayFlights
+        ) {
+            messageText = ""
+            pendingAttachments.removeAll()
+            scheduledSendDate = nil
+        }
         OrchardMotion.HapticStyle.light.fire()
     }
 }
