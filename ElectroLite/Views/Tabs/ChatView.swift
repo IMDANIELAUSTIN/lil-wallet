@@ -1,6 +1,6 @@
 //
 //  ChatView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 10/24/26.
 //
@@ -297,6 +297,8 @@ struct ChatView: View {
                 Text("\(count)")
                     .font(.system(.body, design: appearance.getAppFont()))
                     .foregroundStyle(.secondary)
+                    .contentTransition(.numericText(value: Double(count)))
+                    .animation(.default, value: count)
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold, design: appearance.getAppFont()))

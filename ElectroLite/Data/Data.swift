@@ -1,6 +1,6 @@
 //
 //  Data.swift
-//  ElectroLite
+//  Salt
 //
 //
 //  Created and All Rights Reserved by Daniel Lee Austin on Oct/21/2026.
@@ -199,7 +199,7 @@ class Wallet: ObservableObject {
         self.fallbackTask = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 3_500_000_000)
             guard let self = self, !Task.isCancelled else { return }
-            if self.loadingTokens || self.loadingPortfolio || self.loadingTransactions {
+            if refresh || self.loadingTokens || self.loadingPortfolio || self.loadingTransactions {
                 await self.fetchFallbackWalletData()
             }
         }
@@ -273,7 +273,9 @@ class Wallet: ObservableObject {
                         iconURL: item.iconURL
                     )
                 }
-                self.tokens = self.applySavedTokenOrder(mappedTokens)
+                withAnimation(.default) {
+                    self.tokens = self.applySavedTokenOrder(mappedTokens)
+                }
                 self.loadingTokens = false
             }
         }
@@ -291,7 +293,9 @@ class Wallet: ObservableObject {
             let finalTotal = parsedTotal
             Task { @MainActor [weak self] in
                 guard let self = self, let finalTotal = finalTotal else { return }
-                self.value = finalTotal
+                withAnimation(.default) {
+                    self.value = finalTotal
+                }
                 self.loadingPortfolio = false
             }
         }
@@ -481,21 +485,14 @@ class Wallet: ObservableObject {
             iconURL: "https://assets.coingecko.com/coins/images/19785/small/acatxTm8_400x400.jpg"
         )
         
-        if self.loadingTokens {
-            let tokenList = self.applySavedTokenOrder([ethToken, usdcToken, ensToken])
+        let tokenList = self.applySavedTokenOrder([ethToken, usdcToken, ensToken])
+        let total = tokenList.reduce(0.0) { $0 + $1.value() }
+        withAnimation(.default) {
             self.tokens = tokenList
-            self.loadingTokens = false
-            
-            if self.loadingPortfolio {
-                let total = tokenList.reduce(0.0) { $0 + $1.value() }
-                self.value = total
-                self.loadingPortfolio = false
-            }
-        } else if self.loadingPortfolio {
-            let total = self.tokens.reduce(0.0) { $0 + $1.value() }
             self.value = total
-            self.loadingPortfolio = false
         }
+        self.loadingTokens = false
+        self.loadingPortfolio = false
         
             if self.loadingTransactions {
             let now = Int(Date().timeIntervalSince1970)
@@ -597,13 +594,13 @@ class Wallet: ObservableObject {
             OpenSeaAsset(
                 id: 1001,
                 image_url: "https://i.seadn.io/gae/Ju9CkWtV-1Okvf45wo8UctR-M9He2PjILP0oOvxE89AyiPPGtrR3gysu1Zgy0hjd2xKIgjJJtWIc0ybj4Vd7wv8t3pxDGHoJBzDB?w=500&auto=format",
-                name: "ElectroLite Orb #01",
+                name: "Salt Orb #01",
                 external_link: "https://opensea.io",
                 traits: [
                     OpenSeaAssetTrait(trait_type: "Edition", value: "Genesis"),
                     OpenSeaAssetTrait(trait_type: "Palette", value: "Monochrome")
                 ],
-                description: "A minimalist on-chain digital object for ElectroLite.",
+                description: "A minimalist on-chain digital object for Salt.",
                 permalink: "https://opensea.io"
             ),
             OpenSeaAsset(
@@ -615,7 +612,7 @@ class Wallet: ObservableObject {
                     OpenSeaAssetTrait(trait_type: "Format", value: "SVG"),
                     OpenSeaAssetTrait(trait_type: "Geometry", value: "Square + Circle")
                 ],
-                description: "Vector emblem inspired by the ElectroLite mark.",
+                description: "Vector emblem inspired by the Salt mark.",
                 permalink: "https://opensea.io"
             )
         ]

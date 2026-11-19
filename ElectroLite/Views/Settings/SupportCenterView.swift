@@ -1,13 +1,13 @@
 //
 //  SupportCenterView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/14/26.
 //
 
 import SwiftUI
 
-/// Help and FAQ sheet tailored to ElectroLite wallet management, objects, and appearance settings.
+/// Help and FAQ sheet tailored to Salt wallet management, objects, and appearance settings.
 struct SupportCenterView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appearance: Appearance
@@ -19,15 +19,15 @@ struct SupportCenterView: View {
         ),
         (
             "How do portfolio tokens and live activity update?",
-            "ElectroLite streams token balances, pricing, and transaction activity via Zerion. Pull to refresh on Home or Objects anytime to reload balances and recent transfers."
+            "Salt streams token balances, pricing, and transaction activity via Zerion. Pull to refresh on Home or Objects anytime to reload balances and recent transfers."
         ),
         (
             "Why do I see demo NFTs in Objects?",
-            "When no OpenSea v2 API key is configured under Settings ▸ NFT API, ElectroLite automatically displays sample digital objects. Paste your own OpenSea v2 API key to load your wallet's live collectibles."
+            "When no OpenSea v2 API key is configured under Settings ▸ NFT API, Salt automatically displays sample digital objects. Paste your own OpenSea v2 API key to load your wallet's live collectibles."
         ),
         (
-            "Does ElectroLite store private keys or seed phrases?",
-            "No. ElectroLite operates as a read-only watch wallet using public Ethereum addresses and ENS names stored locally on your device. Private keys and seed phrases are never requested or stored."
+            "Does Salt store private keys or seed phrases?",
+            "No. Salt operates as a read-only watch wallet using public Ethereum addresses and ENS names stored locally on your device. Private keys and seed phrases are never requested or stored."
         ),
         (
             "How can I customize appearance or remove a wallet?",

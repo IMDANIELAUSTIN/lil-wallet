@@ -1,6 +1,6 @@
 //
 //  WalletAboutDetailView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/14/26.
 //
@@ -46,7 +46,7 @@ struct WalletAboutDetailView: View {
             case .stablecoins:
                 return "Stablecoins are digital bearer or account-based assets pegged to fiat reference currencies, enabling low-volatility settlement alongside Bitcoin, Ethereum, and Chaumian eCash."
             case .ethereum:
-                return "Ethereum is a programmable blockchain network supporting Ether (ETH) and ERC-compatible tokens and digital objects, powering decentralized applications alongside your ElectroLite portfolio."
+                return "Ethereum is a programmable blockchain network supporting Ether (ETH) and ERC-compatible tokens and digital objects, powering decentralized applications alongside your Salt portfolio."
             }
         }
     }

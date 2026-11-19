@@ -1,6 +1,6 @@
 //
 //  ProFeaturesView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/14/26.
 //
@@ -63,14 +63,14 @@ struct ProFeaturesView: View {
                     }
                     .padding(.top, 16)
 
-                    Text(isProVersionUnlocked ? "ElectroLite Pro Active" : "Support ElectroLite")
+                    Text(isProVersionUnlocked ? "Salt Pro Active" : "Support Salt")
                         .font(.system(.title2, design: appFont, weight: .bold))
                         .foregroundStyle(Color.appPrimary)
 
                     Text(
                         isProVersionUnlocked
-                            ? "Thank you for supporting independent wallet engineering. All ElectroLite Pro features are unlocked."
-                            : "ElectroLite is crafted with care. If you find it valuable, consider leaving a tip to support independent development."
+                            ? "Thank you for supporting independent wallet engineering. All Salt Pro features are unlocked."
+                            : "Salt is crafted with care. If you find it valuable, consider leaving a tip to support independent development."
                     )
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -208,8 +208,8 @@ struct ProFeaturesView: View {
 
                 Text(
                     isProVersionUnlocked
-                        ? "Your purchase of \(name) was successful. ElectroLite Pro features are now unlocked!"
-                        : "Your purchase of \(name) was successful. Thank you for supporting ElectroLite independent development."
+                        ? "Your purchase of \(name) was successful. Salt Pro features are now unlocked!"
+                        : "Your purchase of \(name) was successful. Thank you for supporting Salt independent development."
                 )
                 .font(.body)
                 .foregroundStyle(.secondary)
@@ -375,7 +375,7 @@ struct ProFeaturesView: View {
                 id: "com.astndsgn.electrolite.tip.friendly",
                 displayName: "Small Gift",
                 displayPrice: "$3.99",
-                description: "Support ElectroLite with a small token of appreciation.",
+                description: "Support Salt with a small token of appreciation.",
                 icon: "📓",
                 unlocksPro: false
             ),
@@ -383,7 +383,7 @@ struct ProFeaturesView: View {
                 id: "com.astndsgn.electrolite.tip.generous",
                 displayName: "Generous Gift",
                 displayPrice: "$33.99",
-                description: "Buy the developer a coffee and fuel future ElectroLite updates.",
+                description: "Buy the developer a coffee and fuel future Salt updates.",
                 icon: "📚",
                 unlocksPro: false
             ),

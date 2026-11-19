@@ -1,6 +1,6 @@
 //
 //  ActivityListItem.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/28/21.
 //
@@ -31,6 +31,8 @@ struct ActivityListItem: View {
                             .font(.system(.callout, design: appFont))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
+                            .contentTransition(.numericText(value: transaction.transactionValue()))
+                            .animation(.default, value: transaction.transactionValue())
                     }
                     
                     Text(Date(timeIntervalSince1970: TimeInterval(transaction.mined_at)).formatted(date: .abbreviated, time: .omitted))

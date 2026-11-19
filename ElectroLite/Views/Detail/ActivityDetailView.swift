@@ -1,6 +1,6 @@
 //
 //  ActivityDetailView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/28/21.
 //
@@ -28,6 +28,8 @@ struct ActivityDetailView: View {
                         Text("\(wallet.formatCurrency(value: transaction.transactionValue()))")
                             .font(.system(size: 50, weight: .bold, design: appFont))
                             .multilineTextAlignment(.center)
+                            .contentTransition(.numericText(value: transaction.transactionValue()))
+                            .animation(.default, value: transaction.transactionValue())
                         
                         Button {
                             merchantNameInput = wallet.merchantName(for: transaction)
@@ -119,6 +121,8 @@ struct ActivityDetailView: View {
                         Spacer()
                         Text(wallet.formatCurrency(value: transaction.transactionValue()))
                             .font(.system(.headline, design: appFont))
+                            .contentTransition(.numericText(value: transaction.transactionValue()))
+                            .animation(.default, value: transaction.transactionValue())
                     }
                     
                     HStack {
@@ -128,6 +132,8 @@ struct ActivityDetailView: View {
                         Text(wallet.formatCurrency(value: transaction.fee?.feePrice() ?? 0))
                             .font(.system(.body, design: appFont))
                             .foregroundStyle(.secondary)
+                            .contentTransition(.numericText(value: transaction.fee?.feePrice() ?? 0))
+                            .animation(.default, value: transaction.fee?.feePrice() ?? 0)
                     }
                 }
                 .padding(.vertical, 2)
@@ -138,6 +144,8 @@ struct ActivityDetailView: View {
                     Spacer()
                     Text(wallet.formatCurrency(value: transaction.fullTotalValue()))
                         .font(.system(.headline, design: appFont))
+                        .contentTransition(.numericText(value: transaction.fullTotalValue()))
+                        .animation(.default, value: transaction.fullTotalValue())
                 }
                 .padding(.vertical, 2)
             })
@@ -169,6 +177,8 @@ struct ActivityDetailView: View {
                             Spacer()
                             Text(wallet.formatCurrency(value: transactionPrice))
                                 .font(.system(.headline, design: appFont))
+                                .contentTransition(.numericText(value: transactionPrice))
+                                .animation(.default, value: transactionPrice)
                         }
                     }
                 }, header: {

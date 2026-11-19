@@ -1,13 +1,13 @@
 //
 //  SettingsCardComponents.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/14/26.
 //
 
 import SwiftUI
 
-/// Shared header banner card used across ElectroLite App Information views.
+/// Shared header banner card used across Salt App Information views.
 struct SettingsHeaderCard: View {
     let symbol: String
     let symbolColor: Color

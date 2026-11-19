@@ -1,6 +1,6 @@
 //
 //  CoinsView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/28/21.
 //
@@ -30,6 +30,8 @@ struct CoinsView: View {
                 .font(appearance.getBalanceFont(size: 34, weight: .bold))
                 .foregroundStyle(Color.appPrimary)
                 .multilineTextAlignment(.center)
+                .contentTransition(.numericText(value: wallet.value))
+                .animation(.default, value: wallet.value)
             Spacer()
         }
     }

@@ -1,6 +1,6 @@
 //
 //  NewChatView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 10/25/26.
 //

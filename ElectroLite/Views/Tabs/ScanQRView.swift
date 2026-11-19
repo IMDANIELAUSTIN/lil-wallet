@@ -1,6 +1,6 @@
 //
 //  ScanQRView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 10/22/26.
 //

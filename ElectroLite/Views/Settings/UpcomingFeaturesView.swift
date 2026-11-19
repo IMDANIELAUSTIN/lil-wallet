@@ -1,13 +1,13 @@
 //
 //  UpcomingFeaturesView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/14/26.
 //
 
 import SwiftUI
 
-/// Roadmap overview showcasing upcoming ElectroLite capabilities and Pro early access.
+/// Roadmap overview showcasing upcoming Salt capabilities and Pro early access.
 struct UpcomingFeaturesView: View {
     @EnvironmentObject var appearance: Appearance
     @State private var selectedFeature: UpcomingFeatureItem?
@@ -49,7 +49,7 @@ struct UpcomingFeaturesView: View {
             accentColor: .orange,
             subtitle: "Private bearer eCash alongside Ethereum assets",
             badgeText: "COMING SOON",
-            footerDescription: "Combine Chaumian eCash mints with Bitcoin and stablecoins inside ElectroLite for private, instant peer-to-peer transfers.",
+            footerDescription: "Combine Chaumian eCash mints with Bitcoin and stablecoins inside Salt for private, instant peer-to-peer transfers.",
             highlights: [
                 ("lock.shield.fill", "100% Non-Custodial Keys", "Keys stay inside Apple Secure Enclave on your device—only you control your funds."),
                 ("bolt.fill", "Lightning & Cashu Transfers", "Send and receive instant bearer tokens with minimal fees."),
@@ -113,7 +113,7 @@ struct UpcomingFeaturesView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "star.fill")
                             .font(.system(size: 14, weight: .bold))
-                        Text("Support ElectroLite & Unlock Pro")
+                        Text("Support Salt & Unlock Pro")
                     }
                 }
                 .buttonStyle(PrimaryCapsuleButtonStyle())

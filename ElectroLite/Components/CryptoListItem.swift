@@ -1,6 +1,6 @@
 //
 //  CryptoListItem.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/28/21.
 //
@@ -31,11 +31,15 @@ struct CryptoListItem: View {
                     Text(token.percentChange())
                         .font(.system(.callout, design: appFont))
                         .foregroundStyle(.secondary)
+                        .contentTransition(.numericText(value: token.price?.relative_change ?? 0))
+                        .animation(.default, value: token.price?.relative_change ?? 0)
                 }
                 
                 Text("\(wallet.formatCurrency(value: token.value()))")
                     .font(.system(.body, design: appFont))
                     .foregroundStyle(.secondary)
+                    .contentTransition(.numericText(value: token.value()))
+                    .animation(.default, value: token.value())
             }
             
             Image(systemName: "chevron.right")

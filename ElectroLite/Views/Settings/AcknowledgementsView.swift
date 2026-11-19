@@ -1,13 +1,13 @@
 //
 //  AcknowledgementsView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/14/26.
 //
 
 import SwiftUI
 
-/// Attributions view preserving ElectroLite's Data & Contributor credits alongside open-source frameworks.
+/// Attributions view preserving Salt's Data & Contributor credits alongside open-source frameworks.
 struct AcknowledgementsView: View {
     @EnvironmentObject var appearance: Appearance
 
@@ -30,7 +30,7 @@ struct AcknowledgementsView: View {
             subtitle: "Portfolio & Transaction Stream API",
             badge: "Data Provider",
             badgeColor: .blue,
-            description: "Real-time Ethereum token balances, historical pricing, and live address transaction feeds powering ElectroLite's Home and Activity screens.",
+            description: "Real-time Ethereum token balances, historical pricing, and live address transaction feeds powering Salt's Home and Activity screens.",
             attributionNote: "Zerion Developer Documentation.",
             linkLabel: "Docs",
             linkURL: "https://docs.zerion.io"
@@ -41,7 +41,7 @@ struct AcknowledgementsView: View {
             subtitle: "NFT & Digital Objects API v2",
             badge: "Data Provider",
             badgeColor: .indigo,
-            description: "On-chain collectible metadata, artwork resolution, and trait indexing for ElectroLite's Objects gallery.",
+            description: "On-chain collectible metadata, artwork resolution, and trait indexing for Salt's Objects gallery.",
             attributionNote: "OpenSea Developer Documentation.",
             linkLabel: "Docs",
             linkURL: "https://docs.opensea.io"
@@ -102,7 +102,7 @@ struct AcknowledgementsView: View {
             subtitle: "Creator & Lead Engineer",
             badge: "Contributor",
             badgeColor: .mint,
-            description: "Designed and built ElectroLite for fast, minimalist tracking of digital currencies and on-chain objects on iOS.",
+            description: "Designed and built Salt for fast, minimalist tracking of digital currencies and on-chain objects on iOS.",
             attributionNote: "@imdanielaustin",
             linkLabel: "Profile",
             linkURL: "https://twitter.com/imdanielaustin"
@@ -128,7 +128,7 @@ struct AcknowledgementsView: View {
                             .foregroundStyle(Color.appPrimary)
                     }
 
-                    Text("ElectroLite runs locally on your device with zero third-party analytics or ad tracking SDKs, connecting only to the blockchain data APIs required to display your wallets.")
+                    Text("Salt runs locally on your device with zero third-party analytics or ad tracking SDKs, connecting only to the blockchain data APIs required to display your wallets.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

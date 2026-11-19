@@ -1,6 +1,6 @@
 //
 //  AddWalletView.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/28/21.
 //

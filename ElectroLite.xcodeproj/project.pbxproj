@@ -54,7 +54,7 @@
 		861F66182753FEE1006E6295 /* AddWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWalletView.swift; sourceTree = "<group>"; };
 		861F661A27554F73006E6295 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		861F661C2755522A006E6295 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
-		862133032753E3E8002BD765 /* ElectroLite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElectroLite.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		862133032753E3E8002BD765 /* Salt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Salt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		862133062753E3E8002BD765 /* electroliteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = electroliteApp.swift; sourceTree = "<group>"; };
 		862133082753E3E8002BD765 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8621330A2753E3EA002BD765 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -133,7 +133,7 @@
 		862133042753E3E8002BD765 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				862133032753E3E8002BD765 /* ElectroLite.app */,
+				862133032753E3E8002BD765 /* Salt.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -225,9 +225,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		862133022753E3E8002BD765 /* ElectroLite */ = {
+		862133022753E3E8002BD765 /* Salt */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 862133162753E3EA002BD765 /* Build configuration list for PBXNativeTarget "ElectroLite" */;
+			buildConfigurationList = 862133162753E3EA002BD765 /* Build configuration list for PBXNativeTarget "Salt" */;
 			buildPhases = (
 				862132FF2753E3E8002BD765 /* Sources */,
 				862133002753E3E8002BD765 /* Frameworks */,
@@ -237,12 +237,12 @@
 			);
 			dependencies = (
 			);
-			name = ElectroLite;
+			name = Salt;
 			packageProductDependencies = (
 				86A000022753E3EA002BD765 /* SocketIO */,
 			);
-			productName = ElectroLite;
-			productReference = 862133032753E3E8002BD765 /* ElectroLite.app */;
+			productName = Salt;
+			productReference = 862133032753E3E8002BD765 /* Salt.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -276,7 +276,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				862133022753E3E8002BD765 /* ElectroLite */,
+				862133022753E3E8002BD765 /* Salt */,
 			);
 		};
 /* End PBXProject section */
@@ -543,7 +543,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		862133162753E3EA002BD765 /* Build configuration list for PBXNativeTarget "ElectroLite" */ = {
+		862133162753E3EA002BD765 /* Build configuration list for PBXNativeTarget "Salt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				862133172753E3EA002BD765 /* Debug */,

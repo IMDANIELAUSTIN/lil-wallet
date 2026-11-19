@@ -1,6 +1,6 @@
 //
 //  Helpers.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/29/21.
 //

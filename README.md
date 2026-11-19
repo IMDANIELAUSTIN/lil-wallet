@@ -1,8 +1,8 @@
-# ElectroLite
+# Salt
 
-**ElectroLite — Wallet for Crypto and Energy**
+**Salt — Wallet for Crypto and Energy**
 
-ElectroLite is an Ethereum & digital asset wallet built with SwiftUI and Swift 6 for iOS 17.0 through iOS 27.
+Salt is an Ethereum & digital asset wallet built with SwiftUI and Swift 6 for iOS 17.0 through iOS 27.
 
 There are two main views:
 - **Money**: Your tokens (ETH, USDC, ENS, etc.) and portfolio balance

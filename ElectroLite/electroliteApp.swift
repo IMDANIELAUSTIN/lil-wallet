@@ -1,6 +1,6 @@
 //
 //  electroliteApp.swift
-//  ElectroLite
+//  Salt
 //
 //  Created by Daniel Lee Austin on 11/28/21.
 //
@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 
 @main
-struct ElectroLiteApp: App {
+struct SaltApp: App {
     @StateObject private var appearance = Appearance()
     @StateObject private var wallet = Wallet()
     let persistenceController = PersistenceController.shared
