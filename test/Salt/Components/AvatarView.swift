@@ -1,0 +1,46 @@
+//
+//  AvatarView.swift
+//  Salt
+//
+//  Created by Daniel Lee Austin on 11/29/21.
+//
+
+import SwiftUI
+
+struct AvatarView: View {
+    @EnvironmentObject var appearance: Appearance
+    let text: String
+    var iconURL: String? = nil
+    
+    var body: some View {
+        if let iconURL = iconURL, !iconURL.isEmpty {
+            ImageView(imageUrl: iconURL)
+                .frame(width: 40, height: 40)
+                .clipShape(Circle())
+                .background(
+                    Circle()
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(Color(.secondarySystemBackground))
+                )
+        } else {
+            placeholder
+        }
+    }
+    
+    var placeholder: some View {
+        ZStack {
+            Text(text.prefix(1).uppercased())
+                .font(.system(.headline, design: appearance.getAppFont()))
+                .foregroundStyle(Color(.systemBackground))
+        }
+        .frame(width: 40, height: 40)
+        .background(appearance.getAppColor())
+        .clipShape(Circle())
+    }
+}
+
+struct AvatarView_Previews: PreviewProvider {
+    static var previews: some View {
+        AvatarView(text: "abc")
+    }
+}

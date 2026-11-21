@@ -1,0 +1,107 @@
+//
+//  CryptoDetailView.swift
+//  Salt
+//
+//  Created by Daniel Lee Austin on 11/28/21.
+//
+
+import SwiftUI
+
+struct CryptoDetailView: View {
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var wallet: Wallet
+    @EnvironmentObject var appearance: Appearance
+    let token: Token
+    
+    var body: some View {
+        let appFont = appearance.getAppFont()
+        
+        List {
+            Section(content: {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Text("\(wallet.formatCurrency(value: token.price?.value ?? 0))")
+                            .font(.system(.largeTitle, design: appFont))
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
+                            .contentTransition(.numericText(value: token.price?.value ?? 0))
+                            .animation(.default, value: token.price?.value ?? 0)
+                        
+                        VStack(spacing: 4) {
+                            Text(token.symbol.uppercased())
+                                .font(.system(.body, design: appFont))
+                                .multilineTextAlignment(.center)
+                        }
+                        .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal)
+                    Spacer()
+                }
+                .padding(.vertical, 24)
+            })
+            .listRowBackground(
+                colorScheme == .light ?
+                    Color(.secondarySystemBackground) :
+                    Color(.systemBackground)
+            )
+            
+            Section(content: {
+                HStack {
+                    Text("Today")
+                        .font(.system(.body, design: appFont))
+                    Spacer()
+                    Label(token.percentChange(), systemImage: token.percentChange().contains("-") ? "arrow.down" : "arrow.up")
+                        .font(.system(.headline, design: appFont))
+                        .foregroundStyle(token.percentChange().contains("-") ? .red : .green)
+                        .contentTransition(.numericText(value: token.price?.relative_change ?? 0))
+                        .animation(.default, value: token.price?.relative_change ?? 0)
+                }
+            })
+            
+            Section(content: {
+                HStack {
+                    Text("Balance")
+                        .font(.system(.body, design: appFont))
+                    Spacer()
+                    Text("\(token.tokenQuantity())")
+                        .lineLimit(1)
+                        .font(.system(.headline, design: appFont))
+                        .contentTransition(.numericText(value: token.tokenQuantity()))
+                        .animation(.default, value: token.tokenQuantity())
+                }
+                
+                HStack {
+                    Text("Value")
+                        .font(.system(.body, design: appFont))
+                    Spacer()
+                    Text("\(wallet.formatCurrency(value: token.value()))")
+                        .font(.system(.headline, design: appFont))
+                        .contentTransition(.numericText(value: token.value()))
+                        .animation(.default, value: token.value())
+                }
+            }, header: {
+                Text("Wallet")
+            })
+            
+            if let etherscanURL = URL(string: "https://etherscan.io/token/\(token.id)?a=\(wallet.currentWalletAddress)") {
+                Section {
+                    Link(destination: etherscanURL, label: {
+                        Text("View on Etherscan")
+                            .font(.system(.body, design: appFont))
+                    })
+                }
+                .foregroundStyle(appearance.getAppColor())
+            }
+        }
+        .navigationTitle(token.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .fontDesign(appFont)
+    }
+}
+
+struct CryptoDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        CryptoDetailView(token: Token(id: "eth", name: "Ethereum", symbol: "ETH", quantity: "1000000000000000000", price: Price(value: 2650, relative_change: 2.45), iconURL: nil))
+    }
+}
