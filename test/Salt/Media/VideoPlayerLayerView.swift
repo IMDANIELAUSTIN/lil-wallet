@@ -27,13 +27,15 @@ final class PlayerLayerHostView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .black
+        backgroundColor = .clear
+        playerLayer.backgroundColor = UIColor.clear.cgColor
         playerLayer.videoGravity = .resizeAspect
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        backgroundColor = .black
+        backgroundColor = .clear
+        playerLayer.backgroundColor = UIColor.clear.cgColor
         playerLayer.videoGravity = .resizeAspect
     }
 }

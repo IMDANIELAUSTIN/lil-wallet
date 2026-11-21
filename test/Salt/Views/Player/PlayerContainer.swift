@@ -17,12 +17,13 @@ import UIKit
 
 struct PlayerContainerConfig {
     var minimisedPlayerRect: CGRect = .zero
+    var isInlinePlacement: Bool = false
     var attachExpandedPlayer: Bool = false
     var expandPlayer: Bool = false
     var dragOffset: CGFloat = 0
     var animation: Animation = .interpolatingSpring(duration: 0.34, bounce: 0, initialVelocity: 0)
 
-    mutating func expand(defaultAnchorSize: CGSize? = nil) {
+    mutating func ensureAnchorRect(defaultAnchorSize: CGSize?) {
         if minimisedPlayerRect == .zero, let screenSize = defaultAnchorSize {
             minimisedPlayerRect = CGRect(
                 x: 16,
@@ -30,11 +31,6 @@ struct PlayerContainerConfig {
                 width: max(200, screenSize.width - 32),
                 height: 54
             )
-        }
-        attachExpandedPlayer = true
-        withAnimation(animation) {
-            expandPlayer = true
-            dragOffset = 0
         }
     }
 
@@ -50,19 +46,21 @@ struct PlayerContainerConfig {
 
 struct PlayerContainer: View {
     @Binding var config: PlayerContainerConfig
-    var namespace: Namespace.ID
     var isExpandedSlot: Bool = false
 
+    @Namespace private var namespace
     @EnvironmentObject var playerManager: MediaPlayerManager
     @EnvironmentObject var appearance: Appearance
+    @Environment(\.tabViewBottomAccessoryPlacement) private var accessoryPlacement
 
     var body: some View {
         if isExpandedSlot && config.attachExpandedPlayer {
             let expandPlayer = config.expandPlayer
+            let isRestingExpanded = expandPlayer && config.dragOffset <= 0.5
             let minimisedRect = effectiveMinimisedRect()
             let minimumRadius = max(minimisedRect.height / 2, 24)
             let shape = ConcentricRectangle(
-                corners: .concentric(minimum: .fixed(minimumRadius)),
+                corners: .concentric(minimum: .fixed(isRestingExpanded ? 0 : minimumRadius)),
                 isUniform: true
             )
 
@@ -93,10 +91,13 @@ struct PlayerContainer: View {
                 )
                 .overlay(alignment: .top) {
                     if !expandPlayer {
-                        MiniPlayer(namespace: namespace)
-                            .frame(height: minimisedRect.height)
-                            .geometryGroup()
-                            .transition(.blurReplace)
+                        MiniPlayer(
+                            namespace: namespace,
+                            forcedInlineCompact: config.isInlinePlacement
+                        )
+                        .frame(height: minimisedRect.height)
+                        .geometryGroup()
+                        .transition(.blurReplace)
                     }
                 }
                 .contentShape(shape)
@@ -129,21 +130,35 @@ struct PlayerContainer: View {
                 .ignoresSafeArea()
             }
         } else if !isExpandedSlot {
-            GeometryReader { proxy in
-                MiniPlayer(namespace: namespace)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(.rect)
-                    .onTapGesture {
-                        config.minimisedPlayerRect = proxy.frame(in: .global)
-                        toggleExpandedPlayer(status: true)
+            MiniPlayer()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(.rect)
+                .opacity(config.attachExpandedPlayer ? 0 : 1)
+                .allowsHitTesting(!config.attachExpandedPlayer)
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { newRect in
+                    guard !config.attachExpandedPlayer,
+                          newRect.width > 0,
+                          newRect.height > 0 else {
+                        return
                     }
-                    .onAppear {
-                        let rect = proxy.frame(in: .global)
-                        if rect.width > 0 && rect.height > 0 {
-                            config.minimisedPlayerRect = rect
-                        }
+                    config.minimisedPlayerRect = newRect
+                }
+                .onAppear {
+                    if !config.attachExpandedPlayer {
+                        config.isInlinePlacement = (accessoryPlacement == .inline)
                     }
-            }
+                }
+                .onChange(of: accessoryPlacement) { _, newPlacement in
+                    if !config.attachExpandedPlayer {
+                        config.isInlinePlacement = (newPlacement == .inline)
+                    }
+                }
+                .onTapGesture {
+                    config.isInlinePlacement = (accessoryPlacement == .inline)
+                    toggleExpandedPlayer(status: true)
+                }
         }
     }
 
@@ -156,10 +171,11 @@ struct PlayerContainer: View {
 
     private func toggleExpandedPlayer(status: Bool) {
         if status {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                config.attachExpandedPlayer = true
+            config.attachExpandedPlayer = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.04) {
                 withAnimation(config.animation) {
                     config.expandPlayer = true
+                    config.dragOffset = 0
                 }
             }
         } else {
@@ -187,6 +203,17 @@ fileprivate struct DismissGesture: UIGestureRecognizerRepresentable {
             let velocity = pan.velocity(in: pan.view)
             // Only engage on deliberate downward vertical gestures
             return velocity.y > 0 && abs(velocity.y) > abs(velocity.x) * 1.25
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            var current = touch.view
+            while let view = current {
+                if view is UISlider || view is UIControl {
+                    return false
+                }
+                current = view.superview
+            }
+            return true
         }
     }
 

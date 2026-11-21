@@ -117,36 +117,49 @@ final class MediaPlayerManager: ObservableObject {
     }
 
     private func setupObservers() {
+        timeObserver = Self.makePeriodicTimeObserver(player: player, manager: self)
+        timeControlObservation = Self.makeTimeControlObserver(player: player, manager: self)
+    }
+
+    private nonisolated static func makePeriodicTimeObserver(
+        player: AVPlayer,
+        manager: MediaPlayerManager
+    ) -> Any {
         let interval = CMTime(seconds: 0.25, preferredTimescale: 600)
-        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] cmTime in
+        return player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak manager] cmTime in
             let seconds = CMTimeGetSeconds(cmTime)
             guard seconds.isFinite else { return }
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                if !self.isScrubbing {
-                    self.currentTime = max(0, seconds)
+            Task { @MainActor [weak manager] in
+                guard let manager else { return }
+                if !manager.isScrubbing {
+                    manager.currentTime = max(0, seconds)
                 }
-                self.syncNowPlayingInfo()
+                manager.syncNowPlayingInfo()
             }
         }
+    }
 
-        timeControlObservation = player.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
-            let status = player.timeControlStatus
-            Task { @MainActor [weak self] in
-                guard let self else { return }
+    private nonisolated static func makeTimeControlObserver(
+        player: AVPlayer,
+        manager: MediaPlayerManager
+    ) -> NSKeyValueObservation {
+        player.observe(\.timeControlStatus, options: [.new]) { [weak manager] observedPlayer, _ in
+            let status = observedPlayer.timeControlStatus
+            Task { @MainActor [weak manager] in
+                guard let manager else { return }
                 switch status {
                 case .playing:
-                    self.isPlaying = true
-                    self.isBuffering = false
+                    manager.isPlaying = true
+                    manager.isBuffering = false
                 case .waitingToPlayAtSpecifiedRate:
-                    self.isBuffering = true
+                    manager.isBuffering = true
                 case .paused:
-                    self.isPlaying = false
-                    self.isBuffering = false
+                    manager.isPlaying = false
+                    manager.isBuffering = false
                 @unknown default:
                     break
                 }
-                self.syncNowPlayingInfo()
+                manager.syncNowPlayingInfo()
             }
         }
     }
@@ -238,23 +251,32 @@ final class MediaPlayerManager: ObservableObject {
             NotificationCenter.default.removeObserver(endOfItemObserver)
         }
 
-        itemStatusObservation = playerItem.observe(\.status, options: [.new]) { [weak self] item, _ in
+        itemStatusObservation = Self.makeItemStatusObserver(playerItem: playerItem, manager: self)
+        itemDurationObservation = Self.makeItemDurationObserver(playerItem: playerItem, manager: self)
+        endOfItemObserver = Self.makeEndOfItemObserver(playerItem: playerItem, manager: self)
+    }
+
+    private nonisolated static func makeItemStatusObserver(
+        playerItem: AVPlayerItem,
+        manager: MediaPlayerManager
+    ) -> NSKeyValueObservation {
+        playerItem.observe(\.status, options: [.new]) { [weak manager] item, _ in
             let status = item.status
             let errMsg = item.error?.localizedDescription
-            Task { @MainActor [weak self] in
-                guard let self else { return }
+            let dur = CMTimeGetSeconds(item.duration)
+            Task { @MainActor [weak manager] in
+                guard let manager else { return }
                 switch status {
                 case .readyToPlay:
-                    self.playbackError = nil
-                    let dur = CMTimeGetSeconds(item.duration)
+                    manager.playbackError = nil
                     if dur.isFinite && dur > 0 {
-                        self.duration = dur
+                        manager.duration = dur
                     }
-                    self.syncNowPlayingInfo()
+                    manager.syncNowPlayingInfo()
                 case .failed:
-                    self.isBuffering = false
-                    self.isPlaying = false
-                    self.playbackError = errMsg ?? "Unable to load media stream."
+                    manager.isBuffering = false
+                    manager.isPlaying = false
+                    manager.playbackError = errMsg ?? "Unable to load media stream."
                 case .unknown:
                     break
                 @unknown default:
@@ -262,23 +284,33 @@ final class MediaPlayerManager: ObservableObject {
                 }
             }
         }
+    }
 
-        itemDurationObservation = playerItem.observe(\.duration, options: [.new]) { [weak self] item, _ in
+    private nonisolated static func makeItemDurationObserver(
+        playerItem: AVPlayerItem,
+        manager: MediaPlayerManager
+    ) -> NSKeyValueObservation {
+        playerItem.observe(\.duration, options: [.new]) { [weak manager] item, _ in
             let dur = CMTimeGetSeconds(item.duration)
             guard dur.isFinite && dur > 0 else { return }
-            Task { @MainActor [weak self] in
-                self?.duration = dur
-                self?.syncNowPlayingInfo()
+            Task { @MainActor [weak manager] in
+                manager?.duration = dur
+                manager?.syncNowPlayingInfo()
             }
         }
+    }
 
-        endOfItemObserver = NotificationCenter.default.addObserver(
+    private nonisolated static func makeEndOfItemObserver(
+        playerItem: AVPlayerItem,
+        manager: MediaPlayerManager
+    ) -> NSObjectProtocol {
+        NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: playerItem,
             queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.handleItemEnded()
+        ) { [weak manager] _ in
+            Task { @MainActor [weak manager] in
+                manager?.handleItemEnded()
             }
         }
     }

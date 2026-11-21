@@ -625,7 +625,11 @@ class Wallet: ObservableObject {
                     MediaChapter(id: "ch-2", title: "Playable On-Chain Media", startTime: 75),
                     MediaChapter(id: "ch-3", title: "Video & Audio-Only Flow", startTime: 220),
                     MediaChapter(id: "ch-4", title: "Closing Thoughts", startTime: 420)
-                ]
+                ],
+                collection_name: "Salt Cast",
+                token_standard: "ERC-721",
+                contract_address: "0x7A4c9F3e2B1d8E6a5C4b3A2f1E0d9C8b7A6F5E4D",
+                network: "Ethereum"
             ),
             OpenSeaAsset(
                 id: 2002,
@@ -650,7 +654,11 @@ class Wallet: ObservableObject {
                     MediaChapter(id: "bm-1", title: "Opening Horizon", startTime: 0),
                     MediaChapter(id: "bm-2", title: "First Swell", startTime: 35),
                     MediaChapter(id: "bm-3", title: "Finale", startTime: 85)
-                ]
+                ],
+                collection_name: "Salt Cinema",
+                token_standard: "ERC-721",
+                contract_address: "0x4E8a1D2c3B4f5A6e7D8c9B0a1F2e3D4c5B6a7E8F",
+                network: "Base"
             ),
             OpenSeaAsset(
                 id: 2003,
@@ -681,7 +689,11 @@ class Wallet: ObservableObject {
                 Midnight signal in the stereo
                 Moving steady, moving slow
                 """,
-                chapters: []
+                chapters: [],
+                collection_name: "Aurelia Editions",
+                token_standard: "ERC-1155",
+                contract_address: "0x9C1b2E3f4A5d6C7b8E9f0A1b2C3d4E5f6A7b8C9D",
+                network: "Ethereum"
             ),
             OpenSeaAsset(
                 id: 2004,
@@ -707,7 +719,11 @@ class Wallet: ObservableObject {
                 Quiet rhythm in the room
                 Analog and crystal bloom
                 """,
-                chapters: []
+                chapters: [],
+                collection_name: "Solstice Masters",
+                token_standard: "ERC-721",
+                contract_address: "0x3F2e1D0c9B8a7F6e5D4c3B2a1F0e9D8c7B6a5F4E",
+                network: "Ethereum"
             ),
             OpenSeaAsset(
                 id: 1001,
@@ -719,7 +735,11 @@ class Wallet: ObservableObject {
                     OpenSeaAssetTrait(trait_type: "Palette", value: "Monochrome")
                 ],
                 description: "A minimalist on-chain digital object for Salt.",
-                permalink: "https://opensea.io"
+                permalink: "https://opensea.io",
+                collection_name: "Salt Objects",
+                token_standard: "ERC-721",
+                contract_address: "0x1A2b3C4d5E6f7A8b9C0d1E2f3A4b5C6d7E8f9A0B",
+                network: "Ethereum"
             ),
             OpenSeaAsset(
                 id: 1002,
@@ -731,7 +751,11 @@ class Wallet: ObservableObject {
                     OpenSeaAssetTrait(trait_type: "Geometry", value: "Square + Circle")
                 ],
                 description: "Vector emblem inspired by the Salt mark.",
-                permalink: "https://opensea.io"
+                permalink: "https://opensea.io",
+                collection_name: "Salt Objects",
+                token_standard: "ERC-721",
+                contract_address: "0x1A2b3C4d5E6f7A8b9C0d1E2f3A4b5C6d7E8f9A0B",
+                network: "Ethereum"
             )
         ]
     }
@@ -760,12 +784,15 @@ struct OpenSeaV2NFT: Codable, Sendable {
     var animation_url: String?
     var display_animation_url: String?
     var collection: String?
+    var contract: String?
+    var token_standard: String?
     var updated_at: String?
     var opensea_url: String?
     
     func toOpenSeaAsset() -> OpenSeaAsset {
         let numericId = Int(identifier ?? "") ?? abs((identifier ?? UUID().uuidString).hashValue)
         let formattedDate = Self.formatISODate(updated_at)
+        let formattedCollection = collection?.replacingOccurrences(of: "-", with: " ").capitalized
         return OpenSeaAsset(
             id: numericId,
             image_url: display_image_url ?? image_url ?? "",
@@ -775,8 +802,12 @@ struct OpenSeaV2NFT: Codable, Sendable {
             description: description,
             permalink: opensea_url ?? "https://opensea.io",
             animation_url: display_animation_url ?? animation_url,
-            creator_name: collection?.replacingOccurrences(of: "-", with: " ").capitalized,
-            release_date: formattedDate
+            creator_name: formattedCollection,
+            release_date: formattedDate,
+            collection_name: formattedCollection,
+            token_standard: token_standard?.uppercased(),
+            contract_address: contract,
+            network: "Ethereum"
         )
     }
 
@@ -807,6 +838,10 @@ struct OpenSeaAsset: Codable, Identifiable, Hashable, Sendable {
     let audio_format: String?
     let transcript_or_lyrics: String?
     let chapters: [MediaChapter]
+    let collection_name: String?
+    let token_standard: String?
+    let contract_address: String?
+    let network: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -823,6 +858,10 @@ struct OpenSeaAsset: Codable, Identifiable, Hashable, Sendable {
         case audio_format
         case transcript_or_lyrics
         case chapters
+        case collection_name
+        case token_standard
+        case contract_address
+        case network
     }
     
     init(
@@ -839,7 +878,11 @@ struct OpenSeaAsset: Codable, Identifiable, Hashable, Sendable {
         media_kind_hint: NFTMediaKind? = nil,
         audio_format: String? = nil,
         transcript_or_lyrics: String? = nil,
-        chapters: [MediaChapter] = []
+        chapters: [MediaChapter] = [],
+        collection_name: String? = nil,
+        token_standard: String? = nil,
+        contract_address: String? = nil,
+        network: String? = "Ethereum"
     ) {
         self.id = id
         self.image_url = image_url
@@ -855,6 +898,10 @@ struct OpenSeaAsset: Codable, Identifiable, Hashable, Sendable {
         self.audio_format = audio_format
         self.transcript_or_lyrics = transcript_or_lyrics
         self.chapters = chapters
+        self.collection_name = collection_name
+        self.token_standard = token_standard
+        self.contract_address = contract_address
+        self.network = network
     }
     
     init(from decoder: Decoder) throws {
@@ -873,6 +920,10 @@ struct OpenSeaAsset: Codable, Identifiable, Hashable, Sendable {
         self.audio_format = try? container.decodeIfPresent(String.self, forKey: .audio_format)
         self.transcript_or_lyrics = try? container.decodeIfPresent(String.self, forKey: .transcript_or_lyrics)
         self.chapters = (try? container.decodeIfPresent([MediaChapter].self, forKey: .chapters)) ?? []
+        self.collection_name = try? container.decodeIfPresent(String.self, forKey: .collection_name)
+        self.token_standard = try? container.decodeIfPresent(String.self, forKey: .token_standard)
+        self.contract_address = try? container.decodeIfPresent(String.self, forKey: .contract_address)
+        self.network = (try? container.decodeIfPresent(String.self, forKey: .network)) ?? "Ethereum"
     }
     
     func isSVG() -> Bool {

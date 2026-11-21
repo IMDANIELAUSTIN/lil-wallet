@@ -36,76 +36,83 @@ final class SystemMediaCoordinator {
         self.callbacks = callbacks
         guard !isConfigured else { return }
         isConfigured = true
+        Self.installRemoteCommandTargets(coordinator: self)
+    }
 
+    private nonisolated static func installRemoteCommandTargets(coordinator: SystemMediaCoordinator) {
         let center = MPRemoteCommandCenter.shared()
 
         center.playCommand.isEnabled = true
-        center.playCommand.addTarget { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onPlay()
+        center.playCommand.addTarget { [weak coordinator] _ in
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onPlay()
             }
             return .success
         }
 
         center.pauseCommand.isEnabled = true
-        center.pauseCommand.addTarget { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onPause()
+        center.pauseCommand.addTarget { [weak coordinator] _ in
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onPause()
             }
             return .success
         }
 
         center.togglePlayPauseCommand.isEnabled = true
-        center.togglePlayPauseCommand.addTarget { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onTogglePlayPause()
+        center.togglePlayPauseCommand.addTarget { [weak coordinator] _ in
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onTogglePlayPause()
             }
             return .success
         }
 
-        center.nextTrackCommand.addTarget { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onNextTrack()
+        center.nextTrackCommand.addTarget { [weak coordinator] _ in
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onNextTrack()
             }
             return .success
         }
 
-        center.previousTrackCommand.addTarget { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onPreviousTrack()
+        center.previousTrackCommand.addTarget { [weak coordinator] _ in
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onPreviousTrack()
             }
             return .success
         }
 
         center.skipBackwardCommand.preferredIntervals = [15]
-        center.skipBackwardCommand.addTarget { [weak self] event in
+        center.skipBackwardCommand.addTarget { [weak coordinator] event in
             let interval = (event as? MPSkipIntervalCommandEvent)?.interval ?? 15
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onSkipBackward(interval)
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onSkipBackward(interval)
             }
             return .success
         }
 
         center.skipForwardCommand.preferredIntervals = [30]
-        center.skipForwardCommand.addTarget { [weak self] event in
+        center.skipForwardCommand.addTarget { [weak coordinator] event in
             let interval = (event as? MPSkipIntervalCommandEvent)?.interval ?? 30
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onSkipForward(interval)
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onSkipForward(interval)
             }
             return .success
         }
 
         center.changePlaybackPositionCommand.isEnabled = true
-        center.changePlaybackPositionCommand.addTarget { [weak self] event in
+        center.changePlaybackPositionCommand.addTarget { [weak coordinator] event in
             guard let posEvent = event as? MPChangePlaybackPositionCommandEvent else {
                 return .commandFailed
             }
             let targetTime = posEvent.positionTime
-            Task { @MainActor [weak self] in
-                self?.callbacks?.onSeek(targetTime)
+            Task { @MainActor [weak coordinator] in
+                coordinator?.callbacks?.onSeek(targetTime)
             }
             return .success
         }
+    }
+
+    private nonisolated static func makeMediaItemArtwork(for image: UIImage) -> MPMediaItemArtwork {
+        MPMediaItemArtwork(boundsSize: image.size) { _ in image }
     }
 
     func activateAudioSession(for kind: NFTMediaKind) {
@@ -166,8 +173,7 @@ final class SystemMediaCoordinator {
         }
 
         if let artwork {
-            let size = artwork.size
-            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: size) { _ in artwork }
+            info[MPMediaItemPropertyArtwork] = Self.makeMediaItemArtwork(for: artwork)
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info

@@ -26,9 +26,13 @@ struct ExpandedPlayer: View {
     @EnvironmentObject var appearance: Appearance
     @Environment(\.colorScheme) private var colorScheme
 
+    @AppStorage("hasSeenVideoTogglePopover") private var hasSeenVideoTogglePopover: Bool = false
+
     @State private var fadeIn: Bool = false
     @State private var showVideoOverlayControls: Bool = false
     @State private var overlayHideTask: Task<Void, Never>?
+    @State private var popoverTask: Task<Void, Never>?
+    @State private var showVideoTogglePopover: Bool = false
     @State private var showTranscriptSheet: Bool = false
     @State private var showQueueSheet: Bool = false
     @State private var inspectedAsset: OpenSeaAsset?
@@ -38,32 +42,15 @@ struct ExpandedPlayer: View {
 
         Group {
             if let item = playerManager.currentItem {
-                VStack(spacing: 0) {
-                    // Top Grabber
-                    grabberHandle
-                        .padding(.top, max(safeArea.top, 16) + 6)
-                        .padding(.bottom, 12)
-                        .animation(config.animation.speed(2)) {
-                            $0.opacity(config.expandPlayer ? 1 : 0)
-                        }
-                        .opacity(fadeIn ? 1 : 0)
+                let isLandscape = size.width > size.height
 
-                    Spacer(minLength: 6)
-
-                    // Hero Media Canvas (16:9 Full-Bleed Video OR 1:1 Inset Rounded Artwork)
-                    mediaStage(for: item)
-
-                    Spacer(minLength: 16)
-
-                    // Lower Controls Stack
-                    controlsStack(for: item, appFont: appFont)
-                        .frame(maxWidth: 460)
-                        .animation(config.animation.speed(2)) {
-                            $0.opacity(config.expandPlayer ? 1 : 0)
-                        }
-                        .opacity(fadeIn ? 1 : 0)
+                Group {
+                    if isLandscape {
+                        landscapeBody(for: item, appFont: appFont)
+                    } else {
+                        portraitBody(for: item, appFont: appFont)
+                    }
                 }
-                .padding(.bottom, max(safeArea.bottom, 12) + 12)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background {
                     ArtworkAmbientBackground(palette: playerManager.ambientPalette)
@@ -72,6 +59,25 @@ struct ExpandedPlayer: View {
                     withAnimation(config.animation.delay(0.08)) {
                         fadeIn = true
                     }
+                    if CommandLine.arguments.contains("-openNFTDetails"),
+                       inspectedAsset == nil,
+                       let asset = item.sourceAsset {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            inspectedAsset = asset
+                        }
+                    } else {
+                        scheduleVideoTogglePopoverIfNeeded(for: item)
+                    }
+                }
+                .onChange(of: playerManager.currentItem?.id) { _, _ in
+                    if let current = playerManager.currentItem {
+                        scheduleVideoTogglePopoverIfNeeded(for: current)
+                    }
+                }
+                .onDisappear {
+                    overlayHideTask?.cancel()
+                    popoverTask?.cancel()
+                    showVideoTogglePopover = false
                 }
                 .sheet(isPresented: $showTranscriptSheet) {
                     TranscriptLyricsSheet()
@@ -101,6 +107,7 @@ struct ExpandedPlayer: View {
                     }
                     .tint(appearance.getAppColor())
                     .fontDesign(appFont)
+                    .presentationDragIndicator(.visible)
                 }
                 .fullScreenCover(isPresented: $playerManager.showFullscreenVideo) {
                     FullscreenVideoPlayerView(player: playerManager.player)
@@ -109,6 +116,65 @@ struct ExpandedPlayer: View {
             }
         }
         .fontDesign(appFont)
+    }
+
+    // MARK: - Portrait & Landscape Layouts
+
+    @ViewBuilder
+    private func portraitBody(for item: MediaItem, appFont: Font.Design) -> some View {
+        VStack(spacing: 0) {
+            // Top Grabber
+            grabberHandle
+                .padding(.top, max(safeArea.top, 16) + 6)
+                .padding(.bottom, 12)
+                .animation(config.animation.speed(2)) {
+                    $0.opacity(config.expandPlayer ? 1 : 0)
+                }
+                .opacity(fadeIn ? 1 : 0)
+
+            Spacer(minLength: 6)
+
+            // Hero Media Canvas (16:9 Full-Bleed Video OR 1:1 Inset Rounded Artwork)
+            mediaStage(for: item, isLandscape: false)
+
+            Spacer(minLength: 16)
+
+            // Lower Controls Stack
+            controlsStack(for: item, appFont: appFont, isCompact: false)
+                .frame(maxWidth: 460)
+                .animation(config.animation.speed(2)) {
+                    $0.opacity(config.expandPlayer ? 1 : 0)
+                }
+                .opacity(fadeIn ? 1 : 0)
+        }
+        .padding(.bottom, max(safeArea.bottom, 12) + 12)
+    }
+
+    @ViewBuilder
+    private func landscapeBody(for item: MediaItem, appFont: Font.Design) -> some View {
+        VStack(spacing: 4) {
+            grabberHandle
+                .padding(.top, max(safeArea.top, 8))
+                .animation(config.animation.speed(2)) {
+                    $0.opacity(config.expandPlayer ? 1 : 0)
+                }
+                .opacity(fadeIn ? 1 : 0)
+
+            HStack(alignment: .center, spacing: 20) {
+                mediaStage(for: item, isLandscape: true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                controlsStack(for: item, appFont: appFont, isCompact: true)
+                    .frame(maxWidth: 420)
+                    .animation(config.animation.speed(2)) {
+                        $0.opacity(config.expandPlayer ? 1 : 0)
+                    }
+                    .opacity(fadeIn ? 1 : 0)
+            }
+            .padding(.leading, max(safeArea.leading, 20))
+            .padding(.trailing, max(safeArea.trailing, 20))
+            .padding(.bottom, max(safeArea.bottom, 10))
+        }
     }
 
     // MARK: - Top Grabber
@@ -132,13 +198,17 @@ struct ExpandedPlayer: View {
     // MARK: - Hero Media Stage
 
     @ViewBuilder
-    private func mediaStage(for item: MediaItem) -> some View {
+    private func mediaStage(for item: MediaItem, isLandscape: Bool) -> some View {
         let shadowColor = Color.black.opacity(colorScheme == .dark ? 0.45 : 0.16)
 
         if playerManager.isShowingVideoCanvas {
-            // 16:9 Full-Bleed Edge-to-Edge Video Canvas (Mockup 1)
-            let videoWidth = size.width
+            // 16:9 Full-Bleed Edge-to-Edge Video Canvas (Portrait) or Fitted 16:9 Canvas (Landscape)
+            let maxLandscapeW = max(240, (size.width - safeArea.leading - safeArea.trailing) * 0.48)
+            let maxLandscapeH = max(140, size.height - safeArea.top - safeArea.bottom - 52)
+            let landscapeVideoW = min(maxLandscapeW, maxLandscapeH * (16.0 / 9.0))
+            let videoWidth = isLandscape ? landscapeVideoW : size.width
             let videoHeight = videoWidth * (9.0 / 16.0)
+            let cornerRadius: CGFloat = isLandscape ? 14 : 0
 
             ZStack {
                 // Poster artwork underneath while stream loads first frame
@@ -218,7 +288,7 @@ struct ExpandedPlayer: View {
                 }
             }
             .frame(width: videoWidth, height: videoHeight)
-            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .matchedGeometryEffect(id: "Artwork", in: namespace)
             .shadow(color: shadowColor, radius: 22, x: 0, y: 12)
             .contentShape(Rectangle())
@@ -227,8 +297,10 @@ struct ExpandedPlayer: View {
             }
         } else {
             // 1:1 Inset Rounded Square Artwork (Mockup 2 & Video-Off Audio Mode)
-            let maxSide = min(size.width - 56, max(240, size.height * 0.42))
-            let artworkSize = min(maxSide, 360)
+            let maxSide = isLandscape
+                ? min(size.height - safeArea.top - safeArea.bottom - 56, 280)
+                : min(size.width - 56, max(240, size.height * 0.42))
+            let artworkSize = min(max(160, maxSide), 360)
 
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
@@ -276,11 +348,12 @@ struct ExpandedPlayer: View {
     // MARK: - Lower Controls Stack
 
     @ViewBuilder
-    private func controlsStack(for item: MediaItem, appFont: Font.Design) -> some View {
-        VStack(spacing: 18) {
+    private func controlsStack(for item: MediaItem, appFont: Font.Design, isCompact: Bool) -> some View {
+        let hPad: CGFloat = isCompact ? 12 : 26
+        VStack(spacing: isCompact ? 10 : 18) {
             // 1. Metadata + Favorite / (More or Share)
             metadataRow(for: item, appFont: appFont)
-                .padding(.horizontal, 26)
+                .padding(.horizontal, hPad)
 
             // 2. Scrubber + Time & Center Mode Pill
             VStack(spacing: 4) {
@@ -293,23 +366,23 @@ struct ExpandedPlayer: View {
 
                 timeAndModeBadgeRow(for: item, appFont: appFont)
             }
-            .padding(.horizontal, 26)
+            .padding(.horizontal, hPad)
 
             // 3. Primary Transport Controls
             transportControlsRow(for: item)
-                .padding(.horizontal, 34)
-                .padding(.vertical, 6)
+                .padding(.horizontal, isCompact ? 20 : 34)
+                .padding(.vertical, isCompact ? 0 : 6)
 
             // 4. Volume Slider
             CapsuleVolumeSlider(volume: $playerManager.volume) { newVolume in
                 playerManager.setVolume(newVolume)
             }
-            .padding(.horizontal, 26)
+            .padding(.horizontal, hPad)
 
             // 5. Bottom Utility Bar (Transcript/Lyrics · AirPlay · Queue)
             bottomUtilityRow(for: item)
-                .padding(.horizontal, 40)
-                .padding(.top, 2)
+                .padding(.horizontal, isCompact ? 24 : 40)
+                .padding(.top, isCompact ? 0 : 2)
         }
         .compositingGroup()
     }
@@ -488,6 +561,10 @@ struct ExpandedPlayer: View {
             if item.kind.isVideoCapable {
                 Button {
                     OrchardMotion.HapticStyle.selection.fire()
+                    if showVideoTogglePopover {
+                        showVideoTogglePopover = false
+                    }
+                    hasSeenVideoTogglePopover = true
                     playerManager.toggleVideoOutput()
                 } label: {
                     HStack(spacing: 5) {
@@ -503,6 +580,14 @@ struct ExpandedPlayer: View {
                 }
                 .buttonStyle(TransportPressButtonStyle())
                 .accessibilityLabel(playerManager.isVideoEnabled ? "Turn Video Off" : "Turn Video On")
+                .popover(
+                    isPresented: $showVideoTogglePopover,
+                    attachmentAnchor: .rect(.bounds),
+                    arrowEdge: .bottom
+                ) {
+                    videoTogglePopoverContent(appFont: appFont)
+                        .presentationCompactAdaptation(.popover)
+                }
             } else {
                 Text(item.audioQualityBadge)
                     .font(.system(size: 11.5, weight: .medium, design: appFont))
@@ -598,7 +683,7 @@ struct ExpandedPlayer: View {
             AirPlayRoutePickerView(
                 tintColor: uiTint,
                 activeTintColor: uiActiveTint,
-                prioritizesVideoDevices: item.kind.isVideoCapable
+                prioritizesVideoDevices: false
             )
             .frame(width: 34, height: 34)
             .frame(maxWidth: .infinity)
@@ -618,6 +703,66 @@ struct ExpandedPlayer: View {
             .buttonStyle(TransportPressButtonStyle())
             .accessibilityLabel("Up Next Queue")
         }
+    }
+
+    // MARK: - First-Launch Video Toggle Popover
+
+    private func scheduleVideoTogglePopoverIfNeeded(for item: MediaItem) {
+        let forceShow = CommandLine.arguments.contains("-showVideoTogglePopover")
+        guard item.kind.isVideoCapable,
+              (!hasSeenVideoTogglePopover || forceShow),
+              !CommandLine.arguments.contains("-openNFTDetails"),
+              inspectedAsset == nil,
+              !showTranscriptSheet,
+              !showQueueSheet,
+              !playerManager.showFullscreenVideo else {
+            return
+        }
+
+        popoverTask?.cancel()
+        popoverTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(700))
+            guard !Task.isCancelled,
+                  config.expandPlayer,
+                  playerManager.currentItem?.kind.isVideoCapable == true,
+                  inspectedAsset == nil,
+                  !showTranscriptSheet,
+                  !showQueueSheet else {
+                return
+            }
+            showVideoTogglePopover = true
+            if !forceShow {
+                hasSeenVideoTogglePopover = true
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func videoTogglePopoverContent(appFont: Font.Design) -> some View {
+        HStack(alignment: .center, spacing: 14) {
+            Image(systemName: "tv")
+                .font(.system(size: 26, weight: .regular))
+                .foregroundStyle(Color.appPrimary.opacity(0.62))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Turn Video Off and On")
+                    .font(.system(size: 16, weight: .semibold, design: appFont))
+                    .foregroundStyle(Color.appPrimary.opacity(0.84))
+
+                Text("Switch between watching and listening at any moment.")
+                    .font(.system(size: 14, weight: .regular, design: appFont))
+                    .foregroundStyle(Color.appPrimary.opacity(0.64))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .frame(maxWidth: 320, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showVideoTogglePopover = false
+        }
+        .fontDesign(appFont)
     }
 
     private func formattedRate(_ rate: Float) -> String {

@@ -144,7 +144,7 @@
 		862132FA2753E3E8002BD765 = {
 			isa = PBXGroup;
 			children = (
-				862133052753E3E8002BD765 /* ElectroLite */,
+				862133052753E3E8002BD765 /* test/Salt */,
 				862133042753E3E8002BD765 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -157,7 +157,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		862133052753E3E8002BD765 /* Salt */ = {
+		862133052753E3E8002BD765 /* test/Salt */ = {
 			isa = PBXGroup;
 			children = (
 				862133192753E41D002BD765 /* Data */,
@@ -173,18 +173,7 @@
 				86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */,
 				8621330C2753E3EA002BD765 /* Preview Content */,
 			);
-			path = "test/Salt";
-			sourceTree = "<group>";
-		};
-		86C0000127557000006E6295 /* Media */ = {
-			isa = PBXGroup;
-			children = (
-				86C0001027557000006E6295 /* MediaModels.swift */,
-				86C0001227557000006E6295 /* SystemMediaControls.swift */,
-				86C0001427557000006E6295 /* VideoPlayerLayerView.swift */,
-				86C0001627557000006E6295 /* MediaPlayerManager.swift */,
-			);
-			path = Media;
+			path = test/Salt;
 			sourceTree = "<group>";
 		};
 		8621330C2753E3EA002BD765 /* Preview Content */ = {
@@ -214,18 +203,6 @@
 				862133332753E4D6002BD765 /* ActivityView.swift */,
 			);
 			path = Views;
-			sourceTree = "<group>";
-		};
-		86C0000227557000006E6295 /* Player */ = {
-			isa = PBXGroup;
-			children = (
-				86C0002027557000006E6295 /* PlayerControlComponents.swift */,
-				86C0002227557000006E6295 /* PlayerDrawers.swift */,
-				86C0002427557000006E6295 /* MiniPlayer.swift */,
-				86C0002627557000006E6295 /* ExpandedPlayer.swift */,
-				86C0002827557000006E6295 /* PlayerContainer.swift */,
-			);
-			path = Player;
 			sourceTree = "<group>";
 		};
 		8621331C2753E43C002BD765 /* Tabs */ = {
@@ -267,6 +244,29 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		86C0000127557000006E6295 /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				86C0001027557000006E6295 /* MediaModels.swift */,
+				86C0001227557000006E6295 /* SystemMediaControls.swift */,
+				86C0001427557000006E6295 /* VideoPlayerLayerView.swift */,
+				86C0001627557000006E6295 /* MediaPlayerManager.swift */,
+			);
+			path = Media;
+			sourceTree = "<group>";
+		};
+		86C0000227557000006E6295 /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				86C0002027557000006E6295 /* PlayerControlComponents.swift */,
+				86C0002227557000006E6295 /* PlayerDrawers.swift */,
+				86C0002427557000006E6295 /* MiniPlayer.swift */,
+				86C0002627557000006E6295 /* ExpandedPlayer.swift */,
+				86C0002827557000006E6295 /* PlayerContainer.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -305,7 +305,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 862132FE2753E3E8002BD765 /* Build configuration list for PBXProject "ElectroLite" */;
+			buildConfigurationList = 862132FE2753E3E8002BD765 /* Build configuration list for PBXProject "Salt" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -527,7 +527,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"test/Salt/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "test/Salt/Info.plist";
+				INFOPLIST_FILE = test/Salt/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Salt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
@@ -562,7 +562,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"test/Salt/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "test/Salt/Info.plist";
+				INFOPLIST_FILE = test/Salt/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Salt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
@@ -590,7 +590,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		862132FE2753E3E8002BD765 /* Build configuration list for PBXProject "ElectroLite" */ = {
+		862132FE2753E3E8002BD765 /* Build configuration list for PBXProject "Salt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				862133142753E3EA002BD765 /* Debug */,

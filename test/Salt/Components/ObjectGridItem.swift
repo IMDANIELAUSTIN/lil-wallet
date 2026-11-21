@@ -117,6 +117,7 @@ struct ObjectGridItem: View {
                 }
                 .tint(appearance.getAppColor())
                 .fontDesign(appearance.getAppFont())
+                .presentationDragIndicator(.visible)
             }
         } else {
             NavigationLink(destination: ObjectDetailView(object: object)) {

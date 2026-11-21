@@ -15,7 +15,6 @@ struct ContentView: View {
     @State private var isChatAtRoot = true
     @State private var lastTabSwipeTime: Date = .distantPast
     @State private var playerConfig = PlayerContainerConfig()
-    @Namespace private var playerNamespace
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
     @EnvironmentObject var mediaPlayer: MediaPlayerManager
@@ -157,7 +156,6 @@ struct ContentView: View {
                         if playerConfig.attachExpandedPlayer {
                             PlayerContainer(
                                 config: $playerConfig,
-                                namespace: playerNamespace,
                                 isExpandedSlot: true
                             )
                             .environmentObject(mediaPlayer)
@@ -165,10 +163,9 @@ struct ContentView: View {
                             .transition(.identity)
                         }
                     }
-                    .tabViewBottomAccessory(isEnabled: mediaPlayer.hasActiveItem && !playerConfig.attachExpandedPlayer) {
+                    .tabViewBottomAccessory(isEnabled: mediaPlayer.hasActiveItem) {
                         PlayerContainer(
                             config: $playerConfig,
-                            namespace: playerNamespace,
                             isExpandedSlot: false
                         )
                         .environmentObject(mediaPlayer)
@@ -176,7 +173,13 @@ struct ContentView: View {
                     }
                     .tabBarMinimizeBehavior(.onScrollDown)
                     .simultaneousGesture(tabSwipeGesture)
-                    .background(TabBarConfigurator(activeTab: activeTab, onHorizontalSwipe: handleHorizontalSwipe))
+                    .background(
+                        TabBarConfigurator(
+                            activeTab: activeTab,
+                            isExpandedPlayerAttached: playerConfig.attachExpandedPlayer,
+                            onHorizontalSwipe: handleHorizontalSwipe
+                        )
+                    )
                 } else {
                     let legacyTabs = TabView(selection: $activeTab) {
                         CoinsView()
@@ -220,7 +223,6 @@ struct ContentView: View {
                         if playerConfig.attachExpandedPlayer {
                             PlayerContainer(
                                 config: $playerConfig,
-                                namespace: playerNamespace,
                                 isExpandedSlot: true
                             )
                             .environmentObject(mediaPlayer)
@@ -229,14 +231,19 @@ struct ContentView: View {
                         }
                     }
                     .simultaneousGesture(tabSwipeGesture)
-                    .background(TabBarConfigurator(activeTab: activeTab, onHorizontalSwipe: handleHorizontalSwipe))
+                    .background(
+                        TabBarConfigurator(
+                            activeTab: activeTab,
+                            isExpandedPlayerAttached: playerConfig.attachExpandedPlayer,
+                            onHorizontalSwipe: handleHorizontalSwipe
+                        )
+                    )
 
                     if #available(iOS 26.1, *) {
                         legacyTabs
-                            .tabViewBottomAccessory(isEnabled: mediaPlayer.hasActiveItem && !playerConfig.attachExpandedPlayer) {
+                            .tabViewBottomAccessory(isEnabled: mediaPlayer.hasActiveItem) {
                                 PlayerContainer(
                                     config: $playerConfig,
-                                    namespace: playerNamespace,
                                     isExpandedSlot: false
                                 )
                                 .environmentObject(mediaPlayer)
@@ -249,7 +256,6 @@ struct ContentView: View {
                                 if mediaPlayer.hasActiveItem && !playerConfig.attachExpandedPlayer {
                                     PlayerContainer(
                                         config: $playerConfig,
-                                        namespace: playerNamespace,
                                         isExpandedSlot: false
                                     )
                                     .environmentObject(mediaPlayer)
@@ -279,7 +285,14 @@ struct ContentView: View {
             guard newToken != nil else { return }
             let windowSize = currentWindowSize()
             if !playerConfig.attachExpandedPlayer {
-                playerConfig.expand(defaultAnchorSize: windowSize)
+                playerConfig.ensureAnchorRect(defaultAnchorSize: windowSize)
+                playerConfig.attachExpandedPlayer = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.04) {
+                    withAnimation(playerConfig.animation) {
+                        playerConfig.expandPlayer = true
+                        playerConfig.dragOffset = 0
+                    }
+                }
             } else if !playerConfig.expandPlayer {
                 withAnimation(playerConfig.animation) {
                     playerConfig.expandPlayer = true
@@ -325,11 +338,12 @@ struct ContentView: View {
 
 private struct TabBarConfigurator: UIViewRepresentable {
     var activeTab: Int
+    var isExpandedPlayerAttached: Bool
     var onHorizontalSwipe: (CGSize, CGSize) -> Void
     
     final class Coordinator: NSObject, UIGestureRecognizerDelegate {
-        var didMinimizeInitially = false
         var didInstallPanGesture = false
+        var isExpandedPlayerAttached = false
         var onHorizontalSwipe: (CGSize, CGSize) -> Void
         
         init(onHorizontalSwipe: @escaping (CGSize, CGSize) -> Void) {
@@ -337,7 +351,7 @@ private struct TabBarConfigurator: UIViewRepresentable {
         }
         
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            guard gesture.state == .ended, let view = gesture.view else { return }
+            guard !isExpandedPlayerAttached, gesture.state == .ended, let view = gesture.view else { return }
             let translation = gesture.translation(in: view)
             let velocity = gesture.velocity(in: view)
             let predictedEnd = CGSize(
@@ -348,6 +362,25 @@ private struct TabBarConfigurator: UIViewRepresentable {
                 CGSize(width: translation.x, height: translation.y),
                 predictedEnd
             )
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            guard !isExpandedPlayerAttached else { return false }
+            var current = touch.view
+            while let view = current {
+                if view is UITabBar || view is UIControl {
+                    return false
+                }
+                current = view.superview
+            }
+            if let rootView = gestureRecognizer.view {
+                let location = touch.location(in: rootView)
+                // Avoid competing with touches on the bottom accessory MiniPlayer or tab bar chrome.
+                if location.y > rootView.bounds.height - 135 {
+                    return false
+                }
+            }
+            return true
         }
         
         func gestureRecognizer(
@@ -389,6 +422,7 @@ private struct TabBarConfigurator: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIView, context: Context) {
         context.coordinator.onHorizontalSwipe = onHorizontalSwipe
+        context.coordinator.isExpandedPlayerAttached = isExpandedPlayerAttached
         self.configureTabBar(from: uiView, coordinator: context.coordinator)
     }
     
@@ -473,17 +507,6 @@ private struct TabBarConfigurator: UIViewRepresentable {
                 default:
                     break
                 }
-            }
-        }
-        
-        if !coordinator.didMinimizeInitially,
-           let vp = tabBar.value(forKey: "_visualProvider") as AnyObject? {
-            let sel = Selector(("setMinimized:"))
-            if vp.responds(to: sel), let imp = vp.method(for: sel) {
-                let shouldMinimize = !CommandLine.arguments.contains("-expandTabBar")
-                typealias SetMinFn = @convention(c) (AnyObject, Selector, Bool) -> Void
-                unsafeBitCast(imp, to: SetMinFn.self)(vp, sel, shouldMinimize)
-                coordinator.didMinimizeInitially = true
             }
         }
     }
