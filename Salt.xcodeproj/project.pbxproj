@@ -144,7 +144,7 @@
 		862132FA2753E3E8002BD765 = {
 			isa = PBXGroup;
 			children = (
-				862133052753E3E8002BD765 /* test/Salt */,
+				862133052753E3E8002BD765 /* main/Salt */,
 				862133042753E3E8002BD765 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -157,7 +157,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		862133052753E3E8002BD765 /* test/Salt */ = {
+		862133052753E3E8002BD765 /* main/Salt */ = {
 			isa = PBXGroup;
 			children = (
 				862133192753E41D002BD765 /* Data */,
@@ -173,7 +173,7 @@
 				86A000042753E3EA002BD765 /* PrivacyInfo.xcprivacy */,
 				8621330C2753E3EA002BD765 /* Preview Content */,
 			);
-			path = test/Salt;
+			path = main/Salt;
 			sourceTree = "<group>";
 		};
 		8621330C2753E3EA002BD765 /* Preview Content */ = {
@@ -524,10 +524,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"test/Salt/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"main/Salt/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = test/Salt/Info.plist;
+				INFOPLIST_FILE = main/Salt/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Salt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
@@ -559,10 +559,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"test/Salt/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"main/Salt/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = test/Salt/Info.plist;
+				INFOPLIST_FILE = main/Salt/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Salt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";

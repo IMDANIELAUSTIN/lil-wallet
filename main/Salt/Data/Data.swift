@@ -580,6 +580,10 @@ class Wallet: ObservableObject {
         }
     }
     
+    var playableMediaItems: [MediaItem] {
+        objects.compactMap { $0.resolvedMediaItem() }
+    }
+
     static func demoObjects() -> [OpenSeaAsset] {
         let svg1 = """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
@@ -592,6 +596,136 @@ class Wallet: ObservableObject {
         
         return [
             OpenSeaAsset(
+                id: 2001,
+                image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop",
+                name: "Salt Cast Ep. 14",
+                external_link: "https://opensea.io",
+                traits: [
+                    OpenSeaAssetTrait(trait_type: "Media Type", value: "Video Podcast"),
+                    OpenSeaAssetTrait(trait_type: "Host", value: "Daniel Austin"),
+                    OpenSeaAssetTrait(trait_type: "Date", value: "11/18/2026"),
+                    OpenSeaAssetTrait(trait_type: "Resolution", value: "1080p 16:9")
+                ],
+                description: "A deep-dive video podcast exploring sovereign digital media, playable NFTs, and native Spatial/Liquid Glass playback.",
+                permalink: "https://opensea.io",
+                animation_url: "https://devstreaming-cdn.apple.com/videos/wwdc/2015/413eflf3lrh1tyo/413/hls_vod_mvp.m3u8",
+                creator_name: "Daniel Austin",
+                release_date: "11/18/2026",
+                media_kind_hint: .videoPodcast,
+                audio_format: "Stereo",
+                transcript_or_lyrics: """
+                [00:00] Welcome back to Salt Cast Episode 14. Today we're exploring what happens when on-chain objects stop being static thumbnails and become living video podcasts, cinema cuts, and master-quality music releases.
+
+                [01:15] With adaptive HLS video and seamless audio-only switching, you can watch full 16:9 episodes right inside your wallet or tap Turn Video Off to keep listening while you walk.
+
+                [03:40] Every token carries verifiable provenance, chapter markers, and creator splits — all presented with native iOS playback and Lock Screen controls.
+                """,
+                chapters: [
+                    MediaChapter(id: "ch-1", title: "Introduction", startTime: 0),
+                    MediaChapter(id: "ch-2", title: "Playable On-Chain Media", startTime: 75),
+                    MediaChapter(id: "ch-3", title: "Video & Audio-Only Flow", startTime: 220),
+                    MediaChapter(id: "ch-4", title: "Closing Thoughts", startTime: 420)
+                ],
+                collection_name: "Salt Cast",
+                token_standard: "ERC-721",
+                contract_address: "0x7A4c9F3e2B1d8E6a5C4b3A2f1E0d9C8b7A6F5E4D",
+                network: "Ethereum"
+            ),
+            OpenSeaAsset(
+                id: 2002,
+                image_url: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800&auto=format&fit=crop",
+                name: "View From A Blue Moon",
+                external_link: "https://opensea.io",
+                traits: [
+                    OpenSeaAssetTrait(trait_type: "Media Type", value: "Video"),
+                    OpenSeaAssetTrait(trait_type: "Director", value: "Blake Vincent Kueny"),
+                    OpenSeaAssetTrait(trait_type: "Date", value: "11/12/2026"),
+                    OpenSeaAssetTrait(trait_type: "Aspect Ratio", value: "16:9")
+                ],
+                description: "Collector edition 16:9 cinema short minted as an interactive video NFT.",
+                permalink: "https://opensea.io",
+                animation_url: "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-576p.mp4",
+                creator_name: "Blake Vincent Kueny",
+                release_date: "11/12/2026",
+                media_kind_hint: .video,
+                audio_format: "Stereo",
+                transcript_or_lyrics: "Shot in sweeping 16:9 cinema framing across the Pacific — collector edition digital film token with full-screen and Picture-in-Picture playback.",
+                chapters: [
+                    MediaChapter(id: "bm-1", title: "Opening Horizon", startTime: 0),
+                    MediaChapter(id: "bm-2", title: "First Swell", startTime: 35),
+                    MediaChapter(id: "bm-3", title: "Finale", startTime: 85)
+                ],
+                collection_name: "Salt Cinema",
+                token_standard: "ERC-721",
+                contract_address: "0x4E8a1D2c3B4f5A6e7D8c9B0a1F2e3D4c5B6a7E8F",
+                network: "Base"
+            ),
+            OpenSeaAsset(
+                id: 2003,
+                image_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop",
+                name: "Midnight Signal",
+                external_link: "https://opensea.io",
+                traits: [
+                    OpenSeaAssetTrait(trait_type: "Media Type", value: "Song"),
+                    OpenSeaAssetTrait(trait_type: "Artist", value: "Aurelia Wave"),
+                    OpenSeaAssetTrait(trait_type: "Audio Format", value: "Stereo"),
+                    OpenSeaAssetTrait(trait_type: "Edition", value: "1 / 100")
+                ],
+                description: "Original electronic single mastered for stereo playback and collected directly on-chain.",
+                permalink: "https://opensea.io",
+                animation_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                creator_name: "Aurelia Wave",
+                release_date: nil,
+                media_kind_hint: .song,
+                audio_format: "Stereo",
+                transcript_or_lyrics: """
+                Static hums across the skyline
+                Neon waves in silver light
+                Every pulse a distant echo
+                Carried softly through the night
+
+                Hold the frequency unbroken
+                Let the warm horizon glow
+                Midnight signal in the stereo
+                Moving steady, moving slow
+                """,
+                chapters: [],
+                collection_name: "Aurelia Editions",
+                token_standard: "ERC-1155",
+                contract_address: "0x9C1b2E3f4A5d6C7b8E9f0A1b2C3d4E5f6A7b8C9D",
+                network: "Ethereum"
+            ),
+            OpenSeaAsset(
+                id: 2004,
+                image_url: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop",
+                name: "Glass Horizon",
+                external_link: "https://opensea.io",
+                traits: [
+                    OpenSeaAssetTrait(trait_type: "Media Type", value: "Song"),
+                    OpenSeaAssetTrait(trait_type: "Artist", value: "Solstice Collective"),
+                    OpenSeaAssetTrait(trait_type: "Audio Format", value: "Lossless"),
+                    OpenSeaAssetTrait(trait_type: "Edition", value: "Genesis")
+                ],
+                description: "Ambient synth edition paired with lossless mastering and collector provenance.",
+                permalink: "https://opensea.io",
+                animation_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                creator_name: "Solstice Collective",
+                release_date: nil,
+                media_kind_hint: .song,
+                audio_format: "Lossless",
+                transcript_or_lyrics: """
+                Refractions on the morning glass
+                Chords dissolve as shadows pass
+                Quiet rhythm in the room
+                Analog and crystal bloom
+                """,
+                chapters: [],
+                collection_name: "Solstice Masters",
+                token_standard: "ERC-721",
+                contract_address: "0x3F2e1D0c9B8a7F6e5D4c3B2a1F0e9D8c7B6a5F4E",
+                network: "Ethereum"
+            ),
+            OpenSeaAsset(
                 id: 1001,
                 image_url: "https://i.seadn.io/gae/Ju9CkWtV-1Okvf45wo8UctR-M9He2PjILP0oOvxE89AyiPPGtrR3gysu1Zgy0hjd2xKIgjJJtWIc0ybj4Vd7wv8t3pxDGHoJBzDB?w=500&auto=format",
                 name: "Salt Orb #01",
@@ -601,7 +735,11 @@ class Wallet: ObservableObject {
                     OpenSeaAssetTrait(trait_type: "Palette", value: "Monochrome")
                 ],
                 description: "A minimalist on-chain digital object for Salt.",
-                permalink: "https://opensea.io"
+                permalink: "https://opensea.io",
+                collection_name: "Salt Objects",
+                token_standard: "ERC-721",
+                contract_address: "0x1A2b3C4d5E6f7A8b9C0d1E2f3A4b5C6d7E8f9A0B",
+                network: "Ethereum"
             ),
             OpenSeaAsset(
                 id: 1002,
@@ -613,7 +751,11 @@ class Wallet: ObservableObject {
                     OpenSeaAssetTrait(trait_type: "Geometry", value: "Square + Circle")
                 ],
                 description: "Vector emblem inspired by the Salt mark.",
-                permalink: "https://opensea.io"
+                permalink: "https://opensea.io",
+                collection_name: "Salt Objects",
+                token_standard: "ERC-721",
+                contract_address: "0x1A2b3C4d5E6f7A8b9C0d1E2f3A4b5C6d7E8f9A0B",
+                network: "Ethereum"
             )
         ]
     }
@@ -639,10 +781,18 @@ struct OpenSeaV2NFT: Codable, Sendable {
     var description: String?
     var image_url: String?
     var display_image_url: String?
+    var animation_url: String?
+    var display_animation_url: String?
+    var collection: String?
+    var contract: String?
+    var token_standard: String?
+    var updated_at: String?
     var opensea_url: String?
     
     func toOpenSeaAsset() -> OpenSeaAsset {
         let numericId = Int(identifier ?? "") ?? abs((identifier ?? UUID().uuidString).hashValue)
+        let formattedDate = Self.formatISODate(updated_at)
+        let formattedCollection = collection?.replacingOccurrences(of: "-", with: " ").capitalized
         return OpenSeaAsset(
             id: numericId,
             image_url: display_image_url ?? image_url ?? "",
@@ -650,12 +800,30 @@ struct OpenSeaV2NFT: Codable, Sendable {
             external_link: opensea_url,
             traits: [],
             description: description,
-            permalink: opensea_url ?? "https://opensea.io"
+            permalink: opensea_url ?? "https://opensea.io",
+            animation_url: display_animation_url ?? animation_url,
+            creator_name: formattedCollection,
+            release_date: formattedDate,
+            collection_name: formattedCollection,
+            token_standard: token_standard?.uppercased(),
+            contract_address: contract,
+            network: "Ethereum"
         )
+    }
+
+    private static func formatISODate(_ iso: String?) -> String? {
+        guard let iso, !iso.isEmpty else { return nil }
+        let parser = ISO8601DateFormatter()
+        parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date = parser.date(from: iso) ?? ISO8601DateFormatter().date(from: iso)
+        guard let date else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy"
+        return formatter.string(from: date)
     }
 }
 
-struct OpenSeaAsset: Codable, Identifiable, Sendable {
+struct OpenSeaAsset: Codable, Identifiable, Hashable, Sendable {
     let id: Int
     let image_url: String
     let name: String?
@@ -663,6 +831,17 @@ struct OpenSeaAsset: Codable, Identifiable, Sendable {
     let traits: [OpenSeaAssetTrait]
     let description: String?
     let permalink: String
+    let animation_url: String?
+    let creator_name: String?
+    let release_date: String?
+    let media_kind_hint: NFTMediaKind?
+    let audio_format: String?
+    let transcript_or_lyrics: String?
+    let chapters: [MediaChapter]
+    let collection_name: String?
+    let token_standard: String?
+    let contract_address: String?
+    let network: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -672,6 +851,17 @@ struct OpenSeaAsset: Codable, Identifiable, Sendable {
         case traits
         case description
         case permalink
+        case animation_url
+        case creator_name
+        case release_date
+        case media_kind_hint
+        case audio_format
+        case transcript_or_lyrics
+        case chapters
+        case collection_name
+        case token_standard
+        case contract_address
+        case network
     }
     
     init(
@@ -681,7 +871,18 @@ struct OpenSeaAsset: Codable, Identifiable, Sendable {
         external_link: String?,
         traits: [OpenSeaAssetTrait],
         description: String?,
-        permalink: String
+        permalink: String,
+        animation_url: String? = nil,
+        creator_name: String? = nil,
+        release_date: String? = nil,
+        media_kind_hint: NFTMediaKind? = nil,
+        audio_format: String? = nil,
+        transcript_or_lyrics: String? = nil,
+        chapters: [MediaChapter] = [],
+        collection_name: String? = nil,
+        token_standard: String? = nil,
+        contract_address: String? = nil,
+        network: String? = "Ethereum"
     ) {
         self.id = id
         self.image_url = image_url
@@ -690,6 +891,17 @@ struct OpenSeaAsset: Codable, Identifiable, Sendable {
         self.traits = traits
         self.description = description
         self.permalink = permalink
+        self.animation_url = animation_url
+        self.creator_name = creator_name
+        self.release_date = release_date
+        self.media_kind_hint = media_kind_hint
+        self.audio_format = audio_format
+        self.transcript_or_lyrics = transcript_or_lyrics
+        self.chapters = chapters
+        self.collection_name = collection_name
+        self.token_standard = token_standard
+        self.contract_address = contract_address
+        self.network = network
     }
     
     init(from decoder: Decoder) throws {
@@ -701,14 +913,89 @@ struct OpenSeaAsset: Codable, Identifiable, Sendable {
         self.traits = (try? container.decodeIfPresent([OpenSeaAssetTrait].self, forKey: .traits)) ?? []
         self.description = try? container.decodeIfPresent(String.self, forKey: .description)
         self.permalink = (try? container.decodeIfPresent(String.self, forKey: .permalink)) ?? "https://opensea.io"
+        self.animation_url = try? container.decodeIfPresent(String.self, forKey: .animation_url)
+        self.creator_name = try? container.decodeIfPresent(String.self, forKey: .creator_name)
+        self.release_date = try? container.decodeIfPresent(String.self, forKey: .release_date)
+        self.media_kind_hint = try? container.decodeIfPresent(NFTMediaKind.self, forKey: .media_kind_hint)
+        self.audio_format = try? container.decodeIfPresent(String.self, forKey: .audio_format)
+        self.transcript_or_lyrics = try? container.decodeIfPresent(String.self, forKey: .transcript_or_lyrics)
+        self.chapters = (try? container.decodeIfPresent([MediaChapter].self, forKey: .chapters)) ?? []
+        self.collection_name = try? container.decodeIfPresent(String.self, forKey: .collection_name)
+        self.token_standard = try? container.decodeIfPresent(String.self, forKey: .token_standard)
+        self.contract_address = try? container.decodeIfPresent(String.self, forKey: .contract_address)
+        self.network = (try? container.decodeIfPresent(String.self, forKey: .network)) ?? "Ethereum"
     }
     
     func isSVG() -> Bool {
         return self.image_url.lowercased().hasSuffix("svg") || self.image_url.hasPrefix("data:image/svg+xml")
     }
+
+    var isPlayableMedia: Bool {
+        resolvedMediaItem() != nil
+    }
+
+    func resolvedMediaItem() -> MediaItem? {
+        guard let streamURL = MediaURLResolver.resolve(animation_url) else { return nil }
+        guard let kind = MediaURLResolver.inferMediaKind(
+            streamURL: streamURL,
+            explicitHint: media_kind_hint,
+            traits: traits,
+            description: description
+        ) else {
+            return nil
+        }
+
+        let traitCreator = traitValue(matching: ["artist", "host", "director", "creator", "author", "producer"])
+        let creator = (creator_name?.isEmpty == false ? creator_name : nil)
+            ?? traitCreator
+            ?? (kind.usesPodcastSkipControls ? "Unknown Host" : "Unknown Artist")
+
+        let traitDate = traitValue(matching: ["date", "release date", "published", "air date"])
+        let dateText = (release_date?.isEmpty == false ? release_date : nil) ?? traitDate
+
+        let traitAudioFormat = traitValue(matching: ["audio format", "audio", "quality", "format"])
+        let qualityBadge: String = {
+            if let audio_format, !audio_format.isEmpty { return audio_format }
+            if let traitAudioFormat, !traitAudioFormat.isEmpty,
+               ["stereo", "lossless", "spatial", "dolby atmos", "hi-res", "mono"].contains(traitAudioFormat.lowercased()) {
+                return traitAudioFormat
+            }
+            return "Stereo"
+        }()
+
+        let artworkURL = MediaURLResolver.resolve(image_url)
+        let permalinkURL = URL(string: permalink)
+
+        return MediaItem(
+            id: "nft-\(id)",
+            assetID: id,
+            kind: kind,
+            title: name ?? "Untitled",
+            creator: creator,
+            releaseDateText: dateText,
+            artworkURL: artworkURL,
+            streamURL: streamURL,
+            audioFallbackURL: nil,
+            durationHint: nil,
+            audioQualityBadge: qualityBadge,
+            lyricsOrTranscript: transcript_or_lyrics,
+            chapters: chapters,
+            permalinkURL: permalinkURL,
+            sourceAsset: self
+        )
+    }
+
+    private func traitValue(matching keys: [String]) -> String? {
+        for key in keys {
+            if let match = traits.first(where: { $0.trait_type.lowercased() == key }), !match.value.isEmpty {
+                return match.value
+            }
+        }
+        return nil
+    }
 }
 
-struct OpenSeaAssetTrait: Codable, Identifiable, Sendable {
+struct OpenSeaAssetTrait: Codable, Identifiable, Hashable, Sendable {
     var id: String { "\(trait_type)-\(value)" }
     var trait_type: String
     var value: String

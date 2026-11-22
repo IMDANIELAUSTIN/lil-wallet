@@ -14,8 +14,10 @@ struct ContentView: View {
     @State private var showScanSheet = false
     @State private var isChatAtRoot = true
     @State private var lastTabSwipeTime: Date = .distantPast
+    @State private var playerConfig = PlayerContainerConfig()
     @EnvironmentObject var wallet: Wallet
     @EnvironmentObject var appearance: Appearance
+    @EnvironmentObject var mediaPlayer: MediaPlayerManager
     @Environment(\.managedObjectContext) private var viewContext
     @State private var timeRemaining = 3
     
@@ -33,6 +35,7 @@ struct ContentView: View {
     }
     
     private func handleHorizontalSwipe(translation: CGSize, predictedEndTranslation: CGSize) {
+        guard !playerConfig.attachExpandedPlayer else { return }
         let now = Date()
         guard now.timeIntervalSince(lastTabSwipeTime) > 0.25 else { return }
         
@@ -57,6 +60,40 @@ struct ContentView: View {
             }
         }
     }
+
+    private func currentWindowSize() -> CGSize {
+        if let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first {
+            return scene.screen.bounds.size
+        }
+        return CGSize(width: 393, height: 852)
+    }
+
+    private func handleDebugLaunchPlayerIfNeeded() {
+        let args = CommandLine.arguments
+        let demos = Wallet.demoObjects().compactMap { $0.resolvedMediaItem() }
+        guard !demos.isEmpty else { return }
+
+        if args.contains("-openVideoPlayer"),
+           let videoItem = demos.first(where: { $0.kind == .videoPodcast }) ?? demos.first(where: { $0.kind.isVideoCapable }) {
+            mediaPlayer.play(videoItem, queue: demos, autoExpand: true)
+        } else if args.contains("-openVideoOffPlayer"),
+                  let videoItem = demos.first(where: { $0.kind == .videoPodcast }) ?? demos.first(where: { $0.kind.isVideoCapable }) {
+            mediaPlayer.play(videoItem, queue: demos, autoExpand: true)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                if mediaPlayer.isVideoEnabled {
+                    mediaPlayer.toggleVideoOutput()
+                }
+            }
+        } else if args.contains("-openMusicPlayer"),
+                  let musicItem = demos.first(where: { $0.kind == .song }) {
+            mediaPlayer.play(musicItem, queue: demos, autoExpand: true)
+        } else if args.contains("-openMiniPlayer"),
+                  let firstItem = demos.first {
+            mediaPlayer.play(firstItem, queue: demos, autoExpand: false)
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -78,6 +115,7 @@ struct ContentView: View {
                         Tab(value: 0) {
                             CoinsView()
                                 .environmentObject(wallet)
+                                .environmentObject(mediaPlayer)
                                 .environment(\.managedObjectContext, viewContext)
                         } label: {
                             Label("Home", systemImage: activeTab == 0 ? "house.fill" : "house")
@@ -89,10 +127,12 @@ struct ContentView: View {
                                 ChatView(activeTab: $activeTab, isAtRoot: $isChatAtRoot)
                                     .environmentObject(wallet)
                                     .environmentObject(appearance)
+                                    .environmentObject(mediaPlayer)
                                     .environment(\.managedObjectContext, viewContext)
                             } else {
                                 CoinsView()
                                     .environmentObject(wallet)
+                                    .environmentObject(mediaPlayer)
                                     .environment(\.managedObjectContext, viewContext)
                             }
                         } label: {
@@ -104,6 +144,7 @@ struct ContentView: View {
                             ChatView(activeTab: $activeTab, isAtRoot: $isChatAtRoot)
                                 .environmentObject(wallet)
                                 .environmentObject(appearance)
+                                .environmentObject(mediaPlayer)
                                 .environment(\.managedObjectContext, viewContext)
                         } label: {
                             Label("Chat", systemImage: activeTab == 2 ? "message.fill" : "message")
@@ -111,13 +152,39 @@ struct ContentView: View {
                         }
                     }
                     .tint(appearance.getAppColor())
+                    .overlay(alignment: .topLeading) {
+                        if playerConfig.attachExpandedPlayer {
+                            PlayerContainer(
+                                config: $playerConfig,
+                                isExpandedSlot: true
+                            )
+                            .environmentObject(mediaPlayer)
+                            .environmentObject(appearance)
+                            .transition(.identity)
+                        }
+                    }
+                    .tabViewBottomAccessory(isEnabled: mediaPlayer.hasActiveItem) {
+                        PlayerContainer(
+                            config: $playerConfig,
+                            isExpandedSlot: false
+                        )
+                        .environmentObject(mediaPlayer)
+                        .environmentObject(appearance)
+                    }
                     .tabBarMinimizeBehavior(.onScrollDown)
                     .simultaneousGesture(tabSwipeGesture)
-                    .background(TabBarConfigurator(activeTab: activeTab, onHorizontalSwipe: handleHorizontalSwipe))
+                    .background(
+                        TabBarConfigurator(
+                            activeTab: activeTab,
+                            isExpandedPlayerAttached: playerConfig.attachExpandedPlayer,
+                            onHorizontalSwipe: handleHorizontalSwipe
+                        )
+                    )
                 } else {
-                    TabView(selection: $activeTab) {
+                    let legacyTabs = TabView(selection: $activeTab) {
                         CoinsView()
                             .environmentObject(wallet)
+                            .environmentObject(mediaPlayer)
                             .environment(\.managedObjectContext, viewContext)
                             .tabItem {
                                 Image(systemName: activeTab == 0 ? "house.fill" : "house")
@@ -129,6 +196,7 @@ struct ContentView: View {
                         
                         CoinsView()
                             .environmentObject(wallet)
+                            .environmentObject(mediaPlayer)
                             .environment(\.managedObjectContext, viewContext)
                             .tabItem {
                                 Image(systemName: "qrcode")
@@ -140,6 +208,7 @@ struct ContentView: View {
                         ChatView(activeTab: $activeTab, isAtRoot: $isChatAtRoot)
                             .environmentObject(wallet)
                             .environmentObject(appearance)
+                            .environmentObject(mediaPlayer)
                             .environment(\.managedObjectContext, viewContext)
                             .tabItem {
                                 Image(systemName: activeTab == 2 ? "message.fill" : "message")
@@ -150,8 +219,54 @@ struct ContentView: View {
                             .tag(2)
                     }
                     .tint(appearance.getAppColor())
+                    .overlay(alignment: .topLeading) {
+                        if playerConfig.attachExpandedPlayer {
+                            PlayerContainer(
+                                config: $playerConfig,
+                                isExpandedSlot: true
+                            )
+                            .environmentObject(mediaPlayer)
+                            .environmentObject(appearance)
+                            .transition(.identity)
+                        }
+                    }
                     .simultaneousGesture(tabSwipeGesture)
-                    .background(TabBarConfigurator(activeTab: activeTab, onHorizontalSwipe: handleHorizontalSwipe))
+                    .background(
+                        TabBarConfigurator(
+                            activeTab: activeTab,
+                            isExpandedPlayerAttached: playerConfig.attachExpandedPlayer,
+                            onHorizontalSwipe: handleHorizontalSwipe
+                        )
+                    )
+
+                    if #available(iOS 26.1, *) {
+                        legacyTabs
+                            .tabViewBottomAccessory(isEnabled: mediaPlayer.hasActiveItem) {
+                                PlayerContainer(
+                                    config: $playerConfig,
+                                    isExpandedSlot: false
+                                )
+                                .environmentObject(mediaPlayer)
+                                .environmentObject(appearance)
+                            }
+                            .tabBarMinimizeBehavior(.onScrollDown)
+                    } else {
+                        legacyTabs
+                            .overlay(alignment: .bottom) {
+                                if mediaPlayer.hasActiveItem && !playerConfig.attachExpandedPlayer {
+                                    PlayerContainer(
+                                        config: $playerConfig,
+                                        isExpandedSlot: false
+                                    )
+                                    .environmentObject(mediaPlayer)
+                                    .environmentObject(appearance)
+                                    .frame(height: 54)
+                                    .glassEffect(.regular, in: Capsule())
+                                    .padding(.horizontal, 16)
+                                    .padding(.bottom, 64)
+                                }
+                            }
+                    }
                 }
             }
         }
@@ -164,6 +279,34 @@ struct ContentView: View {
                 showScanSheet = true
             } else {
                 lastNonProminentTab = newValue
+            }
+        }
+        .onChange(of: mediaPlayer.expandRequestToken) { _, newToken in
+            guard newToken != nil else { return }
+            let windowSize = currentWindowSize()
+            if !playerConfig.attachExpandedPlayer {
+                playerConfig.ensureAnchorRect(defaultAnchorSize: windowSize)
+                playerConfig.attachExpandedPlayer = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.04) {
+                    withAnimation(playerConfig.animation) {
+                        playerConfig.expandPlayer = true
+                        playerConfig.dragOffset = 0
+                    }
+                }
+            } else if !playerConfig.expandPlayer {
+                withAnimation(playerConfig.animation) {
+                    playerConfig.expandPlayer = true
+                    playerConfig.dragOffset = 0
+                }
+            }
+        }
+        .onChange(of: mediaPlayer.currentItem) { _, newItem in
+            if newItem == nil {
+                withAnimation(playerConfig.animation) {
+                    playerConfig.expandPlayer = false
+                    playerConfig.dragOffset = 0
+                }
+                playerConfig.attachExpandedPlayer = false
             }
         }
         .sheet(isPresented: $showScanSheet) {
@@ -179,6 +322,7 @@ struct ContentView: View {
         }
         .onAppear {
             appearance.updateNavBarTypography()
+            handleDebugLaunchPlayerIfNeeded()
         }
         .task {
             try? await Task.sleep(for: .seconds(3))
@@ -194,11 +338,12 @@ struct ContentView: View {
 
 private struct TabBarConfigurator: UIViewRepresentable {
     var activeTab: Int
+    var isExpandedPlayerAttached: Bool
     var onHorizontalSwipe: (CGSize, CGSize) -> Void
     
     final class Coordinator: NSObject, UIGestureRecognizerDelegate {
-        var didMinimizeInitially = false
         var didInstallPanGesture = false
+        var isExpandedPlayerAttached = false
         var onHorizontalSwipe: (CGSize, CGSize) -> Void
         
         init(onHorizontalSwipe: @escaping (CGSize, CGSize) -> Void) {
@@ -206,7 +351,7 @@ private struct TabBarConfigurator: UIViewRepresentable {
         }
         
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            guard gesture.state == .ended, let view = gesture.view else { return }
+            guard !isExpandedPlayerAttached, gesture.state == .ended, let view = gesture.view else { return }
             let translation = gesture.translation(in: view)
             let velocity = gesture.velocity(in: view)
             let predictedEnd = CGSize(
@@ -217,6 +362,25 @@ private struct TabBarConfigurator: UIViewRepresentable {
                 CGSize(width: translation.x, height: translation.y),
                 predictedEnd
             )
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            guard !isExpandedPlayerAttached else { return false }
+            var current = touch.view
+            while let view = current {
+                if view is UITabBar || view is UIControl {
+                    return false
+                }
+                current = view.superview
+            }
+            if let rootView = gestureRecognizer.view {
+                let location = touch.location(in: rootView)
+                // Avoid competing with touches on the bottom accessory MiniPlayer or tab bar chrome.
+                if location.y > rootView.bounds.height - 135 {
+                    return false
+                }
+            }
+            return true
         }
         
         func gestureRecognizer(
@@ -258,6 +422,7 @@ private struct TabBarConfigurator: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIView, context: Context) {
         context.coordinator.onHorizontalSwipe = onHorizontalSwipe
+        context.coordinator.isExpandedPlayerAttached = isExpandedPlayerAttached
         self.configureTabBar(from: uiView, coordinator: context.coordinator)
     }
     
@@ -344,22 +509,14 @@ private struct TabBarConfigurator: UIViewRepresentable {
                 }
             }
         }
-        
-        if !coordinator.didMinimizeInitially,
-           let vp = tabBar.value(forKey: "_visualProvider") as AnyObject? {
-            let sel = Selector(("setMinimized:"))
-            if vp.responds(to: sel), let imp = vp.method(for: sel) {
-                let shouldMinimize = !CommandLine.arguments.contains("-expandTabBar")
-                typealias SetMinFn = @convention(c) (AnyObject, Selector, Bool) -> Void
-                unsafeBitCast(imp, to: SetMinFn.self)(vp, sel, shouldMinimize)
-                coordinator.didMinimizeInitially = true
-            }
-        }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(Wallet())
+            .environmentObject(Appearance())
+            .environmentObject(MediaPlayerManager())
     }
 }
